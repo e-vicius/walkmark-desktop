@@ -4,8 +4,9 @@ Turn a workflow you do once into step-by-step documentation someone else can fol
 
 Steppy is a native desktop app. You pick a screen or window, do the task, and it captures each meaningful step with a screenshot. When you are ready, an AI model writes the instructions. Export as Markdown, a single HTML file, or PDF.
 
-**Website:** [steppy.app](https://steppy.app) (landing page)  
-**Hosted version:** [Steppy Cloud](https://steppy.app#cloud) ($7/mo, no API keys)
+**Website:** [steppy-landing](https://github.com/e-vicius/steppy-landing) (marketing site source)  
+**App (OSS):** https://github.com/e-vicius/steppy  
+**Hosted version:** [Steppy Cloud](#) ($7/mo, no API keys) — coming soon
 
 ## Open source vs Cloud
 
