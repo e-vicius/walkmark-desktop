@@ -1,0 +1,43 @@
+<script lang="ts">
+	import Icon from "@iconify/svelte";
+	import { pluralize } from "$lib/format";
+	import { store } from "$lib/store.svelte";
+	import { Button } from "$lib/components/ui/button";
+
+	const project = $derived(store.project);
+	const missing = $derived(
+		project?.steps.filter((s) => s.include && s.status !== "ready") ?? [],
+	);
+	const included = $derived(project?.steps.filter((s) => s.include) ?? []);
+	const busy = $derived(Boolean(store.generation?.running));
+</script>
+
+{#if project}
+	<div class="flex gap-1">
+		<Button
+			size="sm"
+			disabled={included.length === 0 || busy}
+			onclick={() => {
+				if (!store.canWrite) {
+					store.setDialog("settings");
+					return;
+				}
+				void store.runGeneration(missing.length > 0 ? "missing" : "all");
+			}}
+		>
+			<Icon icon="lucide:sparkles" class="size-3.5" />
+			{busy ? "Writing" : missing.length > 0 ? `Write ${pluralize(missing.length, "step")}` : "Rewrite"}
+		</Button>
+		{#if missing.length > 0}
+			<Button
+				size="sm"
+				variant="ghost"
+				disabled={busy}
+				onclick={() => void store.runGeneration("all")}
+				title="Rewrite every step"
+			>
+				<Icon icon="lucide:refresh-cw" class="size-3.5" />
+			</Button>
+		{/if}
+	</div>
+{/if}

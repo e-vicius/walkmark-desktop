@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+/*
+  Steppy's surfaces are numbered by elevation rather than named by colour, so a
+  component can say "sit one layer above your parent" and stay correct in both
+  themes.
+*/
+@theme {
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Inter, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --radius-panel: 0.875rem;
+  --radius-card: 0.75rem;
+
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-raised: var(--c-raised);
+  --color-overlay: var(--c-overlay);
+  --color-hairline: var(--c-hairline);
+  --color-hairline-strong: var(--c-hairline-strong);
+
+  --color-ink: var(--c-ink);
+  --color-ink-muted: var(--c-ink-muted);
+  --color-ink-faint: var(--c-ink-faint);
+
+  --color-accent: var(--c-accent);
+  --color-accent-hover: var(--c-accent-hover);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-accent-ink: var(--c-accent-ink);
+
+  --color-danger: var(--c-danger);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-success: var(--c-success);
+  --color-warning: var(--c-warning);
+
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.18), 0 12px 32px -8px rgb(0 0 0 / 0.35);
+  --shadow-float: 0 2px 6px rgb(0 0 0 / 0.22), 0 24px 60px -12px rgb(0 0 0 / 0.5);
+}
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --c-canvas: #0b0c10;
+  --c-surface: #131419;
+  --c-raised: #1a1c22;
+  --c-overlay: #212430;
+  --c-hairline: #262832;
+  --c-hairline-strong: #343745;
+
+  --c-ink: #edeef2;
+  --c-ink-muted: #9a9cab;
+  --c-ink-faint: #6b6d7c;
+
+  --c-accent: #6366f1;
+  --c-accent-hover: #7679f5;
+  --c-accent-soft: #1e2040;
+  --c-accent-ink: #ffffff;
+
+  --c-danger: #f2555a;
+  --c-danger-soft: #351a1e;
+  --c-success: #3fbf7f;
+  --c-warning: #e8a33d;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --c-canvas: #f6f6f8;
+  --c-surface: #ffffff;
+  --c-raised: #ffffff;
+  --c-overlay: #ffffff;
+  --c-hairline: #e6e6ec;
+  --c-hairline-strong: #d3d4dd;
+
+  --c-ink: #16171c;
+  --c-ink-muted: #62636f;
+  --c-ink-faint: #8e8f9c;
+
+  --c-accent: #5457ea;
+  --c-accent-hover: #4547d8;
+  --c-accent-soft: #eeeffe;
+  --c-accent-ink: #ffffff;
+
+  --c-danger: #d92d36;
+  --c-danger-soft: #fdecec;
+  --c-success: #1f9d5f;
+  --c-warning: #b97309;
+
+  --shadow-pop: 0 1px 2px rgb(16 16 24 / 0.06), 0 12px 32px -8px rgb(16 16 24 / 0.12);
+  --shadow-float: 0 2px 6px rgb(16 16 24 / 0.08), 0 24px 60px -12px rgb(16 16 24 / 0.18);
+}
+
+* {
+  border-color: var(--c-hairline);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* A desktop app should not rubber-band or text-select like a web page. */
+  overscroll-behavior: none;
+  user-select: none;
+  cursor: default;
+}
+
+input,
+textarea,
+[contenteditable],
+.selectable {
+  user-select: text;
+}
+
+/* The recording HUD paints its own pill; everything around it must let the
+   desktop through. */
+[data-window="hud"],
+[data-window="hud"] body {
+  background: transparent;
+}
+
+/* Native-looking focus: visible for keyboards, invisible for mouse clicks.
+   Layered so a component can still opt out with `focus:outline-none` — an
+   unlayered rule here would outrank every utility class in the app. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--c-ink-faint) 32%, transparent);
+  border: 3px solid transparent;
+  border-radius: 99px;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--c-ink-faint) 55%, transparent);
+  background-clip: content-box;
+}
+
+@utility drag-region {
+  -webkit-app-region: drag;
+}
+@utility no-drag {
+  -webkit-app-region: no-drag;
+}
+
+@keyframes steppy-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes steppy-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes steppy-shimmer {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+@keyframes steppy-pulse-ring {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.86);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@utility animate-fade-up {
+  animation: steppy-fade-up 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@utility animate-fade-in {
+  animation: steppy-fade 0.18s ease-out both;
+}
+
+/* Placeholder shown while a step is waiting on the model. */
+@utility shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--c-raised) 0%,
+    color-mix(in srgb, var(--c-ink-faint) 14%, var(--c-raised)) 50%,
+    var(--c-raised) 100%
+  );
+  background-size: 180% 100%;
+  animation: steppy-shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

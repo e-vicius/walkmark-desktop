@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Steppy",
+  "version": "0.1.0",
+  "identifier": "app.steppy.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Steppy",
+        "width": 1320,
+        "height": 860,
+        "minWidth": 1040,
+        "minHeight": 680,
+        "resizable": true,
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": 14,
+          "y": 28
+        },
+        "backgroundColor": "#111111",
+        "visible": false,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-eval'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:* https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com https://openrouter.ai http://127.0.0.1:11434 http://localhost:11434",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPDATA/**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg", "nsis", "deb", "appimage"],
+    "category": "Productivity",
+    "shortDescription": "Turn any workflow into step-by-step documentation",
+    "longDescription": "Steppy watches you perform a task, automatically captures each meaningful step, writes the instructions with AI, and exports polished documentation as Markdown, HTML or PDF.",
+    "copyright": "© Steppy",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  }
+}
