@@ -51,6 +51,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
