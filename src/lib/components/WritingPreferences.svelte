@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Tone } from "$lib/types";
-	import { languageOptions } from "$lib/languages";
 	import { store } from "$lib/store.svelte";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
@@ -11,10 +10,11 @@
 		SelectTrigger,
 	} from "$lib/components/ui/select";
 	import { ToggleGroup, ToggleGroupItem } from "$lib/components/ui/toggle-group";
+	import LanguageSelect from "$lib/components/LanguageSelect.svelte";
 	import ProductsEditor from "$lib/components/ProductsEditor.svelte";
+	import { LIMITS } from "$lib/limits";
 
 	const settings = $derived(store.settings);
-	const languages = $derived(languageOptions(settings.language));
 
 	function patch(next: Partial<typeof settings>) {
 		void store.updateSettings(next);
@@ -31,6 +31,7 @@
 		<Label>Who is this for?</Label>
 		<Input
 			value={settings.audience}
+			maxlength={LIMITS.audience}
 			placeholder="e.g. a new teammate who has never used this app"
 			oninput={(e) => patch({ audience: (e.currentTarget as HTMLInputElement).value })}
 		/>
@@ -50,23 +51,12 @@
 		</ToggleGroup>
 	</div>
 
-	<div class="space-y-1.5">
-		<Label>Language</Label>
-		<Select
-			type="single"
-			value={settings.language}
-			onValueChange={(language) => language && patch({ language })}
-		>
-			<SelectTrigger class="w-full">
-				{settings.language || "Select language"}
-			</SelectTrigger>
-			<SelectContent>
-				{#each languages as option (option)}
-					<SelectItem value={option} label={option} />
-				{/each}
-			</SelectContent>
-		</Select>
-	</div>
+	<LanguageSelect
+		bind:value={
+			() => settings.language,
+			(v) => patch({ language: v })
+		}
+	/>
 
 	<div class="space-y-1.5 border-t border-(--text)/8 pt-5">
 		<Label>Default product</Label>

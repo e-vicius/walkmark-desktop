@@ -8,6 +8,7 @@ use crate::ai;
 use crate::capture::{self, session::Session};
 use crate::error::{AppError, Result};
 use crate::export::{self, ExportOptions, ExportResult};
+use crate::limits;
 use crate::local;
 use crate::models::*;
 use crate::state::AppState;
@@ -30,8 +31,10 @@ pub fn save_settings(app: AppHandle, state: State<AppState>, settings: Settings)
     settings.capture.sample_interval_ms = settings.capture.sample_interval_ms.clamp(200, 5000);
     settings.capture.sensitivity = settings.capture.sensitivity.clamp(0.0, 1.0);
     settings.capture.min_gap_ms = settings.capture.min_gap_ms.clamp(0, 30_000);
+    settings.capture.input_settle_ms = settings.capture.input_settle_ms.clamp(0, 2000);
     settings.capture.max_width = settings.capture.max_width.clamp(800, 4000);
     settings.capture.countdown_secs = settings.capture.countdown_secs.min(10);
+    settings.normalize_products();
 
     storage::save_settings(&app, &settings)?;
     *state.settings.lock() = settings.clone();
@@ -44,6 +47,8 @@ pub struct PermissionStatus {
     pub granted: bool,
     /// macOS is the only platform where this gate exists today.
     pub required: bool,
+    pub input_granted: bool,
+    pub input_required: bool,
 }
 
 #[tauri::command]
@@ -51,12 +56,15 @@ pub fn permission_status() -> PermissionStatus {
     PermissionStatus {
         granted: capture::has_permission(),
         required: cfg!(target_os = "macos"),
+        input_granted: capture::input::has_input_permission(),
+        input_required: cfg!(target_os = "macos"),
     }
 }
 
 #[tauri::command]
 pub fn request_permission() -> PermissionStatus {
     capture::request_permission();
+    capture::input::request_input_permission();
     permission_status()
 }
 
@@ -113,7 +121,10 @@ pub async fn verify_provider(
     let settings = state.settings.lock().clone();
     let saved = settings.config_for(provider);
 
-    let key = match key.map(|k| k.trim().to_string()).filter(|k| !k.is_empty()) {
+    let key = match key
+        .map(|k| limits::clamp_trim(&k, limits::API_KEY))
+        .filter(|k| !k.is_empty())
+    {
         Some(key) => key,
         None if provider.needs_key() => {
             storage::get_api_key(&app, provider).ok_or(AppError::MissingApiKey)?
@@ -121,17 +132,23 @@ pub async fn verify_provider(
         None => String::new(),
     };
 
-    let pick = |given: Option<String>, fallback: String| {
+    let pick_model = |given: Option<String>, fallback: String| {
         given
-            .map(|v| v.trim().to_string())
+            .map(|v| limits::clamp_trim(&v, limits::MODEL_ID))
+            .filter(|v| !v.is_empty())
+            .unwrap_or(fallback)
+    };
+    let pick_url = |given: Option<String>, fallback: String| {
+        given
+            .map(|v| limits::clamp_trim(&v, limits::BASE_URL))
             .filter(|v| !v.is_empty())
             .unwrap_or(fallback)
     };
 
     ai::provider::Client::new(
         provider,
-        pick(model, saved.model),
-        pick(base_url, saved.base_url),
+        pick_model(model, saved.model),
+        pick_url(base_url, saved.base_url),
         key,
     )?
     .check()
@@ -257,21 +274,23 @@ pub fn start_recording(
     app: AppHandle,
     state: State<AppState>,
     source_id: String,
-    product_id: String,
+    product_id: Option<String>,
 ) -> Result<Project> {
     if state.session.lock().is_some() {
         return Err(AppError::AlreadyRecording);
     }
 
     let settings = state.settings.lock().clone();
-    if settings.product(&product_id).is_none() {
-        return Err(AppError::Invalid(format!(
-            "Unknown product `{product_id}`."
-        )));
+    if let Some(id) = product_id.as_deref() {
+        if settings.product(id).is_none() {
+            return Err(AppError::Invalid(format!(
+                "Unknown product `{id}`."
+            )));
+        }
     }
 
     let mut project = Project::new("Untitled guide", "");
-    project.product_id = Some(product_id);
+    project.product_id = product_id;
     let frames_dir = storage::frames_dir(&app, &project.id)?;
 
     let session = Session::start(
@@ -312,8 +331,14 @@ pub fn mark_step(state: State<AppState>) -> Result<()> {
 #[tauri::command]
 pub fn stop_recording(app: AppHandle, state: State<AppState>) -> Result<Project> {
     let session = state.session.lock().take().ok_or(AppError::NotRecording)?;
-    session.stop();
 
+    // Tell both windows immediately — before the capture thread joins.
+    let _ = app.emit(
+        crate::capture::session::EVT_TICK,
+        session.stopping_tick(),
+    );
+
+    session.stop();
     window::leave_recording_mode(&app);
 
     // Steps arrive as events during the session; the frontend replays them here
@@ -324,6 +349,7 @@ pub fn stop_recording(app: AppHandle, state: State<AppState>) -> Result<Project>
         .clone()
         .ok_or_else(|| AppError::NotFound("The recording was lost.".into()))?;
     storage::save_project(&app, &project)?;
+    let _ = app.emit(crate::capture::session::EVT_STOPPED, &project);
     Ok(project)
 }
 
@@ -426,21 +452,22 @@ pub fn update_project_meta(
         .ok_or_else(|| AppError::NotFound("No document is open.".into()))?;
 
     if let Some(title) = meta.title {
-        let title = title.trim();
+        let title = limits::clamp_trim(&title, limits::DOCUMENT_TITLE);
         project.title = if title.is_empty() {
             "Untitled guide".into()
         } else {
-            title.to_string()
+            title
         };
     }
     if let Some(summary) = meta.summary {
-        project.summary = summary.trim().to_string();
+        project.summary = limits::clamp_trim(&summary, limits::DOCUMENT_SUMMARY);
     }
     if let Some(prerequisites) = meta.prerequisites {
         project.prerequisites = prerequisites
             .into_iter()
-            .map(|p| p.trim().to_string())
+            .map(|p| limits::clamp_trim(&p, limits::PREREQUISITE))
             .filter(|p| !p.is_empty())
+            .take(limits::PREREQUISITES_MAX)
             .collect();
     }
     project.touch();
@@ -491,11 +518,11 @@ pub fn update_step(
 
     let mut text_edited = false;
     if let Some(title) = patch.title {
-        step.title = title.trim().to_string();
+        step.title = limits::clamp_trim(&title, limits::STEP_TITLE);
         text_edited = true;
     }
     if let Some(body) = patch.body {
-        step.body = body.trim().to_string();
+        step.body = limits::clamp_trim(&body, limits::STEP_BODY);
         text_edited = true;
     }
     if let Some(include) = patch.include {
@@ -632,15 +659,41 @@ pub fn merge_steps(app: AppHandle, state: State<AppState>, ids: Vec<String>) -> 
 // ---------------------------------------------------------------------------
 
 #[tauri::command]
-pub fn generate(app: AppHandle, state: State<AppState>, scope: String, ids: Vec<String>) -> Result<()> {
+pub fn generate(
+    app: AppHandle,
+    state: State<AppState>,
+    scope: String,
+    ids: Vec<String>,
+    provider: Option<String>,
+    model: Option<String>,
+) -> Result<()> {
     if state.is_generating() {
         return Err(AppError::Invalid("A run is already in progress.".into()));
     }
+
+    let settings = state.settings.lock().clone();
+    let run_provider = provider
+        .as_deref()
+        .and_then(Provider::parse)
+        .unwrap_or(settings.provider);
+
     // Fail here rather than after the first frame has been resized and sent, so
     // a missing key reads as a setup problem and not a generation failure.
-    let provider = state.settings.lock().provider;
-    if provider.needs_key() && storage::get_api_key(&app, provider).is_none() {
+    if run_provider.needs_key() && storage::get_api_key(&app, run_provider).is_none() {
         return Err(AppError::MissingApiKey);
+    }
+
+    let run_model = model
+        .as_ref()
+        .map(|m| m.trim().to_string())
+        .filter(|m| !m.is_empty())
+        .unwrap_or_else(|| settings.config_for(run_provider).model);
+
+    if !ai::catalog::model_has_vision(run_provider, &run_model) {
+        return Err(AppError::Invalid(format!(
+            "The model `{run_model}` cannot read screenshots. Pick a vision model in the write \
+menu — for Mistral, use Small or Large."
+        )));
     }
 
     let scope = match scope.as_str() {
@@ -649,12 +702,17 @@ pub fn generate(app: AppHandle, state: State<AppState>, scope: String, ids: Vec<
         _ => ai::Scope::Missing,
     };
 
+    let overrides = ai::GenerationOverrides {
+        provider: provider.as_deref().and_then(Provider::parse),
+        model,
+    };
+
     let cancel = Arc::new(AtomicBool::new(false));
     *state.generation.lock() = Some(Arc::clone(&cancel));
 
     let handle = app.clone();
     tauri::async_runtime::spawn(async move {
-        let result = ai::run(handle.clone(), scope, cancel).await;
+        let result = ai::run(handle.clone(), scope, cancel, overrides).await;
         handle.state::<AppState>().generation.lock().take();
         if let Err(e) = result {
             // `AppError` isn't `Clone`, which `emit` requires; serialize it once.
@@ -765,6 +823,25 @@ pub fn open_privacy_settings(app: AppHandle) -> Result<()> {
         app.opener()
             .open_url(
                 "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
+                None::<&str>,
+            )
+            .map_err(|e| AppError::Other(e.to_string()))
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        Ok(())
+    }
+}
+
+#[tauri::command]
+pub fn open_accessibility_settings(app: AppHandle) -> Result<()> {
+    #[cfg(target_os = "macos")]
+    {
+        use tauri_plugin_opener::OpenerExt;
+        app.opener()
+            .open_url(
+                "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
                 None::<&str>,
             )
             .map_err(|e| AppError::Other(e.to_string()))

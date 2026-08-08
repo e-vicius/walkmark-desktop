@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
@@ -8,16 +8,19 @@ use std::time::{Duration, Instant};
 use image::RgbaImage;
 use parking_lot::Mutex;
 use serde::Serialize;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 
 use super::detect;
+use super::input;
 use crate::error::{AppError, Result};
 use crate::models::{CaptureSettings, RecordingState, RecordingTick, Step};
+use crate::window;
 
 pub const EVT_TICK: &str = "recording:tick";
 pub const EVT_STEP: &str = "recording:step";
 pub const EVT_ALTERNATE: &str = "recording:alternate";
 pub const EVT_ERROR: &str = "recording:error";
+pub const EVT_STOPPED: &str = "recording:stopped";
 
 /// How many consecutive capture failures we tolerate before giving up. A window
 /// that gets closed mid-recording shouldn't kill the session instantly, but it
@@ -56,6 +59,7 @@ struct Control {
     /// Set by the "mark step" hotkey; consumed by the next sample.
     mark: AtomicBool,
     step_count: AtomicUsize,
+    elapsed_ms: AtomicU64,
     state: Mutex<RecordingState>,
 }
 
@@ -78,6 +82,7 @@ impl Session {
             paused: AtomicBool::new(false),
             mark: AtomicBool::new(false),
             step_count: AtomicUsize::new(0),
+            elapsed_ms: AtomicU64::new(0),
             state: Mutex::new(RecordingState::Counting),
         });
 
@@ -123,6 +128,16 @@ impl Session {
 
     pub fn mark(&self) {
         self.ctl.mark.store(true, Ordering::SeqCst);
+    }
+
+    pub fn stopping_tick(&self) -> RecordingTick {
+        RecordingTick {
+            state: RecordingState::Stopping,
+            elapsed_ms: self.ctl.elapsed_ms.load(Ordering::Relaxed),
+            step_count: self.step_count(),
+            activity: 0.0,
+            countdown: 0,
+        }
     }
 
     /// Signals the worker and waits for it to finish writing the last frame.
@@ -173,6 +188,7 @@ fn run(
         let remaining = countdown.saturating_sub(countdown_start.elapsed());
         emit_tick(
             &app,
+            &ctl,
             RecordingTick {
                 state: RecordingState::Counting,
                 elapsed_ms: 0,
@@ -190,6 +206,25 @@ fn run(
     let mut paused_total = Duration::ZERO;
     let mut paused_since: Option<Instant> = None;
 
+    let input_ok = input::ensure_listener();
+    let use_input = input_ok;
+    let use_visual = s.visual_fallback || !input_ok;
+    if use_input {
+        input::set_enabled(true);
+    } else if !s.visual_fallback {
+        let _ = app.emit(
+            EVT_ERROR,
+            ErrorEvent {
+                message: "Input monitoring is off — enable Accessibility for Steppy in System \
+Settings, or turn on visual fallback in Recording settings."
+                    .into(),
+                fatal: false,
+            },
+        );
+    }
+
+    let input_settle = Duration::from_millis(s.input_settle_ms.clamp(0, 2000));
+    let mut input_pending: Option<Instant> = None;
     let mut committed_sig: Option<detect::Signature> = None;
     let mut prev_sig: Option<detect::Signature> = None;
     let mut prev_frame: Option<RgbaImage> = None;
@@ -207,12 +242,16 @@ fn run(
 
         // --- Pause -------------------------------------------------------
         if ctl.paused.load(Ordering::SeqCst) {
+            if ctl.stop.load(Ordering::SeqCst) {
+                break;
+            }
             if paused_since.is_none() {
                 paused_since = Some(Instant::now());
                 *ctl.state.lock() = RecordingState::Paused;
             }
             emit_tick(
                 &app,
+                &ctl,
                 RecordingTick {
                     state: RecordingState::Paused,
                     elapsed_ms: elapsed_ms(started, paused_total, paused_since),
@@ -221,7 +260,7 @@ fn run(
                     countdown: 0,
                 },
             );
-            thread::sleep(Duration::from_millis(120));
+            thread::sleep(Duration::from_millis(40));
             continue;
         }
         if let Some(since) = paused_since.take() {
@@ -233,6 +272,9 @@ fn run(
         }
 
         // --- Sample ------------------------------------------------------
+        if ctl.stop.load(Ordering::SeqCst) {
+            break;
+        }
         // Frames are kept at full resolution until one is actually committed:
         // most samples are discarded, and resizing every one of them would cost
         // far more than the screen grab itself.
@@ -287,6 +329,13 @@ fn run(
         let gap_ok = last_commit_at
             .map(|t| now.saturating_sub(t) >= Duration::from_millis(s.min_gap_ms))
             .unwrap_or(true);
+
+        if use_input && input::take_trigger() {
+            input_pending = Some(Instant::now());
+        }
+
+        let input_ready = input_pending.is_some_and(|t| t.elapsed() >= input_settle);
+
         // On the very first sample there is nothing to settle against, so treat
         // it as stable and capture the starting state immediately.
         let settled = !s.settle || prev_sig.is_none() || detect::is_settled(activity);
@@ -300,12 +349,20 @@ fn run(
             0
         };
         let waited_long_enough = settle_waits >= MAX_SETTLE_WAITS;
+        let visual_commit =
+            use_visual && changed && gap_ok && (settled || waited_long_enough);
+        let input_commit = use_input && input_ready && gap_ok;
+        let first_sample = committed_sig.is_none();
 
-        if forced || (changed && gap_ok && (settled || waited_long_enough)) {
+        if forced || first_sample || input_commit || visual_commit {
+            if input_commit {
+                input_pending = None;
+            }
             settle_waits = 0;
+            let manual = forced;
             match write_frame(&cfg.frames_dir, &frame, now.as_millis() as u64, s.max_width) {
                 Ok(name) => {
-                    let mut step = Step::new(name, now.as_millis() as u64, forced);
+                    let mut step = Step::new(name, now.as_millis() as u64, manual);
                     // Whatever was on screen a moment before is often the better
                     // shot (before a menu closed, before a toast vanished).
                     if let Some(prev) = prev_frame.as_ref() {
@@ -338,6 +395,7 @@ fn run(
 
         emit_tick(
             &app,
+            &ctl,
             RecordingTick {
                 state: RecordingState::Recording,
                 elapsed_ms: now.as_millis() as u64,
@@ -358,7 +416,10 @@ fn run(
             // immediate even with a slow sample interval.
             let deadline = Instant::now() + remaining;
             while Instant::now() < deadline {
-                if ctl.stop.load(Ordering::SeqCst) || ctl.mark.load(Ordering::SeqCst) {
+                if ctl.stop.load(Ordering::SeqCst)
+                    || ctl.mark.load(Ordering::SeqCst)
+                    || (use_input && input::has_trigger())
+                {
                     break;
                 }
                 thread::sleep(Duration::from_millis(40).min(deadline - Instant::now()));
@@ -366,17 +427,29 @@ fn run(
         }
     }
 
-    *ctl.state.lock() = RecordingState::Idle;
-    emit_tick(
-        &app,
-        RecordingTick {
-            state: RecordingState::Idle,
-            elapsed_ms: elapsed_ms(started, paused_total, paused_since),
-            step_count: ctl.step_count.load(Ordering::Relaxed),
-            activity: 0.0,
-            countdown: 0,
-        },
-    );
+    input::set_enabled(false);
+
+    // Normal stop takes the session out of AppState before joining; only
+    // unexpected worker exits need to tear down the HUD and clear state here.
+    let orphan = app
+        .try_state::<crate::state::AppState>()
+        .is_some_and(|state| state.session.lock().is_some());
+
+    if orphan {
+        *ctl.state.lock() = RecordingState::Idle;
+        emit_tick(
+            &app,
+            &ctl,
+            RecordingTick {
+                state: RecordingState::Idle,
+                elapsed_ms: elapsed_ms(started, paused_total, paused_since),
+                step_count: ctl.step_count.load(Ordering::Relaxed),
+                activity: 0.0,
+                countdown: 0,
+            },
+        );
+        window::recording_worker_finished(&app);
+    }
 }
 
 fn elapsed_ms(started: Instant, paused_total: Duration, paused_since: Option<Instant>) -> u64 {
@@ -387,7 +460,8 @@ fn elapsed_ms(started: Instant, paused_total: Duration, paused_since: Option<Ins
         .as_millis() as u64
 }
 
-fn emit_tick(app: &AppHandle, tick: RecordingTick) {
+fn emit_tick(app: &AppHandle, ctl: &Control, tick: RecordingTick) {
+    ctl.elapsed_ms.store(tick.elapsed_ms, Ordering::Relaxed);
     let _ = app.emit(EVT_TICK, tick);
 }
 

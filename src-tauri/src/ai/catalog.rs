@@ -19,6 +19,7 @@ pub enum Tier {
     /// Slower and pricier, for dense or unusual interfaces.
     Capable,
     /// Still works, still supported, no longer the one to reach for.
+    #[allow(dead_code)]
     Older,
 }
 
@@ -28,6 +29,8 @@ pub struct ModelInfo {
     pub id: &'static str,
     pub name: &'static str,
     pub note: &'static str,
+    /// Can read screenshots attached to a write request.
+    pub vision: bool,
     pub tier: Tier,
 }
 
@@ -62,18 +65,21 @@ pub fn models_for(provider: Provider) -> Vec<ModelInfo> {
                 id: "gemini-3.6-flash",
                 name: "Gemini 3.6 Flash",
                 note: "Fast, inexpensive and reads interface text well. The right default.",
+                vision: true,
                 tier: Tier::Recommended,
             },
             ModelInfo {
                 id: "gemini-3.5-flash-lite",
                 name: "Gemini 3.5 Flash Lite",
                 note: "Cheapest and quickest. Good for long recordings of simple screens.",
+                vision: true,
                 tier: Tier::Fast,
             },
             ModelInfo {
                 id: "gemini-3.1-pro-preview",
                 name: "Gemini 3.1 Pro",
                 note: "Best at dense dashboards and unfamiliar software. Slower and pricier.",
+                vision: true,
                 tier: Tier::Capable,
             },
         ],
@@ -82,18 +88,21 @@ pub fn models_for(provider: Provider) -> Vec<ModelInfo> {
                 id: "gpt-5.6-terra",
                 name: "GPT-5.6 Terra",
                 note: "Balances quality and cost. The right default.",
+                vision: true,
                 tier: Tier::Recommended,
             },
             ModelInfo {
                 id: "gpt-5.6-luna",
                 name: "GPT-5.6 Luna",
                 note: "Cheapest of the 5.6 family, built for high-volume work.",
+                vision: true,
                 tier: Tier::Fast,
             },
             ModelInfo {
                 id: "gpt-5.6-sol",
                 name: "GPT-5.6 Sol",
                 note: "The frontier model. Best on cluttered or ambiguous screens.",
+                vision: true,
                 tier: Tier::Capable,
             },
         ],
@@ -102,18 +111,44 @@ pub fn models_for(provider: Provider) -> Vec<ModelInfo> {
                 id: "claude-sonnet-5",
                 name: "Claude Sonnet 5",
                 note: "Strong on high-resolution screenshots. The right default.",
+                vision: true,
                 tier: Tier::Recommended,
             },
             ModelInfo {
                 id: "claude-haiku-4-5",
                 name: "Claude Haiku 4.5",
                 note: "Quicker and cheaper, for straightforward interfaces.",
+                vision: true,
                 tier: Tier::Fast,
             },
             ModelInfo {
                 id: "claude-opus-5",
                 name: "Claude Opus 5",
                 note: "The most capable Claude. Noticeably slower and more expensive.",
+                vision: true,
+                tier: Tier::Capable,
+            },
+        ],
+        Provider::Mistral => vec![
+            ModelInfo {
+                id: "mistral-small-latest",
+                name: "Mistral Small",
+                note: "Reads screenshots well. Fast and affordable — the default for writing.",
+                vision: true,
+                tier: Tier::Recommended,
+            },
+            ModelInfo {
+                id: "ministral-8b-latest",
+                name: "Ministral 8B",
+                note: "Lightweight vision model. Good for simple, repetitive screens.",
+                vision: true,
+                tier: Tier::Fast,
+            },
+            ModelInfo {
+                id: "mistral-large-latest",
+                name: "Mistral Large",
+                note: "Reads screenshots; best on dense dashboards. Slower and pricier than Small.",
+                vision: true,
                 tier: Tier::Capable,
             },
         ],
@@ -122,30 +157,35 @@ pub fn models_for(provider: Provider) -> Vec<ModelInfo> {
                 id: "google/gemini-2.5-flash",
                 name: "Gemini 2.5 Flash",
                 note: "Fast and inexpensive through OpenRouter. A good place to start.",
+                vision: true,
                 tier: Tier::Recommended,
             },
             ModelInfo {
                 id: "openai/gpt-4o-mini",
                 name: "GPT-4o mini",
                 note: "OpenAI's budget vision model. Quick on simple screens.",
+                vision: true,
                 tier: Tier::Fast,
             },
             ModelInfo {
                 id: "anthropic/claude-3.5-sonnet",
                 name: "Claude 3.5 Sonnet",
                 note: "Reliable on dense UI text without paying for the top tier.",
+                vision: true,
                 tier: Tier::Fast,
             },
             ModelInfo {
                 id: "openai/gpt-4o",
                 name: "GPT-4o",
                 note: "OpenAI's flagship vision model. Best when the screen is busy.",
+                vision: true,
                 tier: Tier::Capable,
             },
             ModelInfo {
                 id: "anthropic/claude-3.7-sonnet",
                 name: "Claude 3.7 Sonnet",
                 note: "Strong on fine print, tables and unfamiliar layouts.",
+                vision: true,
                 tier: Tier::Capable,
             },
         ],
@@ -157,11 +197,38 @@ pub fn models_for(provider: Provider) -> Vec<ModelInfo> {
     }
 }
 
+/// Whether a model can accept screenshots in a write request.
+pub fn model_has_vision(provider: Provider, model: &str) -> bool {
+    let model = model.trim();
+    if model.is_empty() {
+        return false;
+    }
+    if let Some(info) = models_for(provider).iter().find(|m| m.id == model) {
+        return info.vision;
+    }
+    match provider {
+        Provider::Mistral => mistral_model_has_vision(model),
+        Provider::Ollama => false,
+        _ => true,
+    }
+}
+
+fn mistral_model_has_vision(model: &str) -> bool {
+    let id = model.to_ascii_lowercase();
+    id.contains("pixtral")
+        || id.contains("ministral")
+        || id.contains("mistral-small")
+        || id.contains("mistral-large")
+        || id.contains("mistral-medium")
+        || id.contains("devstral")
+}
+
 pub fn default_model(provider: Provider) -> &'static str {
     match provider {
         Provider::Gemini => "gemini-3.6-flash",
         Provider::OpenAi => "gpt-5.6-terra",
         Provider::Anthropic => "claude-sonnet-5",
+        Provider::Mistral => "mistral-small-latest",
         Provider::OpenRouter => "google/gemini-2.5-flash",
         Provider::Ollama => "qwen3-vl:8b",
         Provider::Compatible => "",
@@ -179,7 +246,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open Google AI Studio and sign in with your Google account.",
                 "Click Create API key and pick an existing Google Cloud project, or create one.",
                 "Copy the key immediately — Google only shows it once.",
-                "Paste it below. Steppy stores it in your Mac keychain.",
+                "Paste it below. Steppy stores it securely on this device.",
             ],
         ),
         Provider::OpenAi => (
@@ -191,7 +258,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open the OpenAI Platform and sign in or create an account.",
                 "Add a payment method if prompted — even small usage requires billing on file.",
                 "Go to API keys and click Create new secret key.",
-                "Copy the key and paste it below. Steppy stores it in your Mac keychain.",
+                "Copy the key and paste it below. Steppy stores it securely on this device.",
             ],
         ),
         Provider::Anthropic => (
@@ -203,7 +270,19 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open the Anthropic Console and sign in or create an account.",
                 "Add billing if you have not used the API before.",
                 "Open Settings → API keys and click Create Key.",
-                "Copy the key and paste it below. Steppy stores it in your Mac keychain.",
+                "Copy the key and paste it below. Steppy stores it securely on this device.",
+            ],
+        ),
+        Provider::Mistral => (
+            "Mistral",
+            "European-hosted models with strong vision and competitive pricing.",
+            "https://console.mistral.ai/api-keys/",
+            "A long alphanumeric string",
+            vec![
+                "Open the Mistral Console and sign in or create an account.",
+                "Add billing if prompted — API usage is pay-as-you-go.",
+                "Go to API keys and create a new key.",
+                "Copy the key and paste it below. Steppy stores it securely on this device.",
             ],
         ),
         Provider::OpenRouter => (
@@ -215,12 +294,12 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open OpenRouter and sign in or create an account.",
                 "Add credits if prompted — OpenRouter bills per model you use.",
                 "Go to Keys and create an API key.",
-                "Copy the key and paste it below. Steppy stores it in your Mac keychain.",
+                "Copy the key and paste it below. Steppy stores it securely on this device.",
             ],
         ),
         Provider::Ollama => (
             "On this Mac",
-            "Runs entirely offline. No key, no cost, nothing leaves the machine.",
+            "Offline models via Ollama — one-click downloads, no API key.",
             "https://ollama.com/download",
             "",
             Vec::new(),

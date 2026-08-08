@@ -6,14 +6,47 @@
 	import { pluralize, relativeTime } from "$lib/format";
 	import { Button } from "$lib/components/ui/button";
 	import { Badge } from "$lib/components/ui/badge";
+	import {
+		Dialog,
+		DialogContent,
+		DialogDescription,
+		DialogFooter,
+		DialogHeader,
+		DialogTitle,
+	} from "$lib/components/ui/dialog";
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuItem,
+		DropdownMenuTrigger,
+	} from "$lib/components/ui/dropdown-menu";
 	import Logo from "$lib/components/Logo.svelte";
+	import LibrarySkeleton from "$lib/components/skeletons/LibrarySkeleton.svelte";
+	import type { ProjectSummary } from "$lib/types";
+
+	let deleteTarget = $state<ProjectSummary | null>(null);
+	let deleting = $state(false);
 
 	onMount(() => {
 		void store.refreshProjects();
 	});
+
+	async function confirmDelete() {
+		if (!deleteTarget || deleting) return;
+		deleting = true;
+		try {
+			await store.removeProject(deleteTarget.id);
+			deleteTarget = null;
+		} finally {
+			deleting = false;
+		}
+	}
 </script>
 
 <div class="h-full overflow-y-auto">
+	{#if store.projectsLoading && store.projects.length === 0}
+		<LibrarySkeleton />
+	{:else}
 	<div class="mx-auto w-full max-w-[960px] px-8 py-12">
 		{#if store.projects.length === 0}
 			<section class="flex flex-col items-center px-6 py-20 text-center">
@@ -45,7 +78,29 @@
 			</section>
 		{/if}
 	</div>
+	{/if}
 </div>
+
+<Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)}>
+	<DialogContent class="max-w-md">
+		<DialogHeader>
+			<DialogTitle>Delete this document?</DialogTitle>
+			<DialogDescription>
+				{#if deleteTarget}
+					“{deleteTarget.title}” and all of its screenshots will be removed permanently.
+				{/if}
+			</DialogDescription>
+		</DialogHeader>
+		<DialogFooter>
+			<Button variant="ghost" disabled={deleting} onclick={() => (deleteTarget = null)}>
+				Cancel
+			</Button>
+			<Button variant="destructive" disabled={deleting} onclick={() => void confirmDelete()}>
+				{deleting ? "Deleting…" : "Delete"}
+			</Button>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>
 
 {#snippet notices(className: string)}
 	{#if store.blockedReason || (!store.permission.granted && store.permission.required)}
@@ -66,7 +121,7 @@
 				<div class="flex items-center gap-3 rounded-3xl bg-(--bg-elevated) px-4 py-3">
 					<Icon icon="lucide:key-round" class="size-4 flex-none text-(--text)/56" />
 					<div class="min-w-0 flex-1">
-						<p class="text-sm font-medium text-(--text)">No model is set up yet</p>
+						<p class="text-sm font-medium text-(--text)">Select an AI model</p>
 						<p class="text-xs text-(--text)/56">{store.blockedReason}</p>
 					</div>
 					<Button size="sm" variant="ghost" onclick={() => store.setDialog("settings")}>
@@ -78,9 +133,11 @@
 	{/if}
 {/snippet}
 
-{#snippet card(project: (typeof store.projects)[number])}
+{#snippet card(project: ProjectSummary)}
 	{@const done = project.stepCount > 0 && project.readyCount === project.stepCount}
-	<article class="group overflow-hidden rounded-3xl bg-(--bg-elevated) transition-transform hover:-translate-y-0.5">
+	<article
+		class="group relative overflow-hidden rounded-3xl bg-(--bg-elevated) transition-transform hover:-translate-y-0.5"
+	>
 		<button
 			type="button"
 			class="block w-full text-left"
@@ -91,6 +148,7 @@
 					<img
 						src={convertFileSrc(project.cover)}
 						alt=""
+						draggable="false"
 						class="size-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
 						loading="lazy"
 					/>
@@ -113,5 +171,32 @@
 				</p>
 			</div>
 		</button>
+
+		<div class="absolute top-3 right-3 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+			<DropdownMenu>
+				<DropdownMenuTrigger>
+					{#snippet child({ props })}
+						<button
+							{...props}
+							type="button"
+							class="grid size-8 place-items-center rounded-xl bg-(--bg-elevated)/95 text-(--text)/72 shadow-sm ring-1 ring-(--text)/10 backdrop-blur-sm transition-colors hover:bg-(--bg-elevated) hover:text-(--text)"
+							aria-label="Document options for {project.title}"
+							onclick={(event) => event.stopPropagation()}
+						>
+							<Icon icon="lucide:ellipsis" class="size-4" />
+						</button>
+					{/snippet}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" class="w-40">
+					<DropdownMenuItem
+						variant="destructive"
+						onclick={() => (deleteTarget = project)}
+					>
+						<Icon icon="lucide:trash-2" />
+						Delete
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
 	</article>
 {/snippet}

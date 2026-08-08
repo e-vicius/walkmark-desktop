@@ -5,6 +5,7 @@ mod error;
 mod export;
 mod imaging;
 pub mod local;
+mod limits;
 mod models;
 mod state;
 mod storage;
@@ -24,7 +25,7 @@ pub mod probe {
     pub use crate::export::{
         html, markdown, pdf, ExportOptions, RenderedImage, RenderedStep,
     };
-    pub use crate::imaging::{apply_annotations, encode_png, fit_width, load};
+    pub use crate::imaging::{apply_annotations, encode_jpeg, encode_png, fit_width, load};
     pub use crate::models::{ExportFormat, Project, Provider};
 
     /// Exposed for `tests/wire.rs`, which drives the provider clients and the
@@ -113,6 +114,7 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
             let settings = storage::load_settings(&handle);
+            storage::warm_api_key_cache(&handle);
             app.manage(AppState::new(settings));
 
             // The window starts hidden so the user never sees an unstyled flash
@@ -156,6 +158,7 @@ pub fn run() {
             commands::permission_status,
             commands::request_permission,
             commands::open_privacy_settings,
+            commands::open_accessibility_settings,
             commands::provider_catalog,
             commands::set_api_key,
             commands::clear_api_key,

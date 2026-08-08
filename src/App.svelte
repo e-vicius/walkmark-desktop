@@ -7,7 +7,7 @@
 	import { isHudWindow } from "$lib/window";
 	import { store } from "$lib/store.svelte";
 	import { Toaster } from "$lib/components/ui/sonner";
-	import { Spinner } from "$lib/components/ui/spinner";
+	import AppBootSkeleton from "$lib/components/skeletons/AppBootSkeleton.svelte";
 	import { Button } from "$lib/components/ui/button";
 
 	import TopBar from "$lib/components/TopBar.svelte";
@@ -19,6 +19,7 @@
 	import Onboarding from "$lib/components/Onboarding.svelte";
 	import RecordingHud from "$lib/components/RecordingHud.svelte";
 	import CountdownOverlay from "$lib/components/CountdownOverlay.svelte";
+	import EditorSkeleton from "$lib/components/skeletons/EditorSkeleton.svelte";
 
 	const isHud = isHudWindow();
 	const close = () => store.closeDialog();
@@ -83,9 +84,7 @@
 {#if isHud}
 	<RecordingHud />
 {:else if !store.ready || !connected}
-	<div class="grid h-full place-items-center">
-		<Spinner class="size-5" />
-	</div>
+	<AppBootSkeleton />
 {:else if bootError}
 	<div class="grid h-full place-items-center p-8">
 		<div class="max-w-md rounded-3xl bg-(--bg-elevated) p-8 text-center">
@@ -101,6 +100,8 @@
 		<main class="min-h-0 flex-1 overflow-hidden">
 			{#if store.route === "library"}
 				<Library />
+			{:else if store.projectLoading}
+				<EditorSkeleton />
 			{:else}
 				<Editor />
 			{/if}

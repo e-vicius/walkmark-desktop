@@ -6,6 +6,7 @@ import { store } from "./store.svelte";
 import type {
   AppError,
   GenerationProgress,
+  Project,
   PullProgress,
   RecordingTick,
   Step,
@@ -18,7 +19,12 @@ export async function connectEvents(): Promise<UnlistenFn> {
 
   unlisteners.push(
     await listen<RecordingTick>("recording:tick", ({ payload }) => {
-      store.recording = payload.state === "idle" ? null : payload;
+      if (payload.state === "idle") {
+        if (!store.stoppingRecording) store.recording = null;
+        return;
+      }
+      store.recording = payload;
+      store.stoppingRecording = payload.state === "stopping";
     }),
   );
 
@@ -59,6 +65,13 @@ export async function connectEvents(): Promise<UnlistenFn> {
           }
         },
       ),
+    );
+
+    unlisteners.push(
+      await listen<Project>("recording:stopped", ({ payload }) => {
+        if (store.finalizingFromMainStop) return;
+        store.finalizeRecording(payload);
+      }),
     );
 
     unlisteners.push(

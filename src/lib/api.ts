@@ -53,6 +53,7 @@ export const saveSettings = (settings: Settings) =>
 export const permissionStatus = () => call<PermissionStatus>("permission_status");
 export const requestPermission = () => call<PermissionStatus>("request_permission");
 export const openPrivacySettings = () => call<void>("open_privacy_settings");
+export const openAccessibilitySettings = () => call<void>("open_accessibility_settings");
 
 export const providerCatalog = () => call<ProviderCatalog>("provider_catalog");
 export const setApiKey = (provider: ProviderId, key: string) =>
@@ -87,8 +88,8 @@ export const listSources = (withThumbnails: boolean) =>
   call<CaptureSource[]>("list_sources", { withThumbnails });
 
 export const recordingStatus = () => call<RecordingStatus>("recording_status");
-export const startRecording = (sourceId: string, productId: string) =>
-  call<Project>("start_recording", { sourceId, productId });
+export const startRecording = (sourceId: string, productId?: string | null) =>
+  call<Project>("start_recording", { sourceId, productId: productId ?? null });
 export const pauseRecording = (paused: boolean) =>
   call<void>("pause_recording", { paused });
 export const markStep = () => call<void>("mark_step");
@@ -150,8 +151,22 @@ export const mergeSteps = (ids: string[]) => call<Project>("merge_steps", { ids 
 
 export type GenerateScope = "missing" | "all" | "only";
 
-export const generate = (scope: GenerateScope, ids: string[] = []) =>
-  call<void>("generate", { scope, ids });
+export interface GenerationRequest {
+  provider?: ProviderId;
+  model?: string;
+}
+
+export const generate = (
+  scope: GenerateScope,
+  ids: string[] = [],
+  request: GenerationRequest = {},
+) =>
+  call<void>("generate", {
+    scope,
+    ids,
+    provider: request.provider ?? null,
+    model: request.model ?? null,
+  });
 export const cancelGeneration = () => call<void>("cancel_generation");
 
 // --- Export -----------------------------------------------------------------

@@ -45,6 +45,7 @@ keyring = "4"
 rayon = "1"
 dirs = "6"
 pulldown-cmark = "0.13"
+rdev = { git = "https://github.com/Narsil/rdev.git", rev = "c77b4e5456301cfa7f2226020f2a58f2f8d77c5d" }
 
 # Only for reading total physical memory, so the local-model list can say what
 # this machine can actually run.

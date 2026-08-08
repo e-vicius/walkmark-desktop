@@ -9,6 +9,10 @@ pub fn url(base: &str, model: &str) -> String {
     format!("{base}/models/{model}:generateContent")
 }
 
+pub fn models_url(base: &str) -> String {
+    format!("{}/models", base.trim_end_matches('/'))
+}
+
 pub fn body(model: &str, ask: &Ask<'_>) -> Value {
     let mut parts = vec![json!({ "text": ask.prompt })];
     parts.extend(ask.images.iter().map(|image| {
@@ -140,6 +144,14 @@ mod tests {
         assert_eq!(
             url("https://example.test/v1beta", "gemini-3.6-flash"),
             "https://example.test/v1beta/models/gemini-3.6-flash:generateContent"
+        );
+    }
+
+    #[test]
+    fn the_models_url_lists_available_models() {
+        assert_eq!(
+            models_url("https://generativelanguage.googleapis.com/v1beta"),
+            "https://generativelanguage.googleapis.com/v1beta/models"
         );
     }
 }

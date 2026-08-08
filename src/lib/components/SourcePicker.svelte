@@ -13,9 +13,12 @@
 		DialogTitle
 	} from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
+	import { Skeleton } from '$lib/components/ui/skeleton';
+	import SourceListSkeleton from '$lib/components/skeletons/SourceListSkeleton.svelte';
 	import { Spinner } from '$lib/components/ui/spinner';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import RecordingContextForm from '$lib/components/RecordingContextForm.svelte';
+	import { LIMITS } from '$lib/limits';
 	import { cn } from '$lib/utils';
 	import type { Tone } from '$lib/types';
 
@@ -63,10 +66,7 @@
 	$effect(() => {
 		if (open) {
 			step = 'context';
-			selectedProduct =
-				store.settings.defaultProductId ??
-				store.settings.products[0]?.id ??
-				null;
+			selectedProduct = null;
 			audience = store.settings.audience;
 			tone = store.settings.tone;
 			language = store.settings.language;
@@ -77,16 +77,16 @@
 	});
 
 	function canContinueContext() {
-		return Boolean(selectedProduct && audience.trim());
+		return Boolean(audience.trim());
 	}
 
 	async function continueToCapture() {
-		if (!canContinueContext() || !selectedProduct) return;
+		if (!canContinueContext()) return;
 		await store.updateSettings({
 			audience: audience.trim(),
 			tone,
 			language: language.trim() || 'English',
-			defaultProductId: selectedProduct,
+			...(selectedProduct ? { defaultProductId: selectedProduct } : {}),
 		});
 		step = 'capture';
 	}
@@ -119,7 +119,7 @@
 	}
 
 	async function start() {
-		if (!selected || !selectedProduct) return;
+		if (!selected) return;
 		starting = true;
 		await store.beginRecording(selected, selectedProduct);
 		starting = false;
@@ -132,8 +132,7 @@
 			{#if step === 'context'}
 				<DialogTitle>What are you documenting?</DialogTitle>
 				<DialogDescription>
-					Tell Steppy which product this guide is for and who will read it, then pick a screen to
-					record.
+					Say who this guide is for. Pick a product if you want its vocabulary applied.
 				</DialogDescription>
 			{:else}
 				<DialogTitle>What should Steppy watch?</DialogTitle>
@@ -188,7 +187,7 @@
 						icon="lucide:search"
 						class="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text)/40"
 					/>
-					<Input bind:value={query} placeholder="Filter by name" class="pl-9" />
+					<Input bind:value={query} maxlength={LIMITS.searchQuery} placeholder="Filter by name" class="pl-9" />
 				</div>
 
 				<Button variant="ghost" size="icon" aria-label="Refresh the list" onclick={() => void load()}>
@@ -197,10 +196,8 @@
 			</div>
 
 			{#if sources === null}
-				<div class="grid min-h-0 flex-1 place-items-center text-(--text)/40">
-					<div class="flex items-center gap-2 text-[13px]">
-						<Spinner /> Looking at your screens…
-					</div>
+				<div class="min-h-0 flex-1 overflow-y-auto py-1">
+					<SourceListSkeleton />
 				</div>
 			{:else if visible.length === 0}
 				<div class="grid min-h-0 flex-1 place-items-center px-8 text-center">
@@ -239,7 +236,7 @@
 										class="size-full object-cover object-top"
 									/>
 								{:else if previewsPending}
-									<div class="size-full animate-pulse bg-(--text)/12" aria-hidden="true"></div>
+									<Skeleton class="size-full rounded-none" />
 								{:else}
 									<div class="grid size-full place-items-center text-(--text)/40">
 										<Icon
@@ -289,7 +286,7 @@
 					Recording preferences
 				</Button>
 				<Button variant="ghost" onclick={() => onClose?.()}>Cancel</Button>
-				<Button disabled={!selected || !selectedProduct || starting} onclick={() => void start()}>
+				<Button disabled={!selected || starting} onclick={() => void start()}>
 					{#if starting}
 						<Spinner class="size-4" />
 					{:else}

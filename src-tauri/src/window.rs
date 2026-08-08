@@ -1,13 +1,18 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
+use tauri::webview::Color;
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
 pub const MAIN: &str = "main";
 pub const HUD: &str = "hud";
 
-const HUD_W: f64 = 384.0;
+const HUD_W: f64 = 300.0;
 const HUD_H: f64 = 84.0;
 /// Distance from the bottom of the screen, clear of the macOS Dock.
 const HUD_BOTTOM_INSET: f64 = 96.0;
+
+static SHORTCUTS_REGISTERED: AtomicBool = AtomicBool::new(false);
 
 /// Swaps the app into "get out of the way" mode: the main window steps aside
 /// and a small always-on-top HUD takes over, so the user can actually see the
@@ -43,6 +48,14 @@ pub fn leave_recording_mode(app: &AppHandle) {
     }
 }
 
+/// Called when the capture worker exits on its own (fatal error, lost source).
+pub fn recording_worker_finished(app: &AppHandle) {
+    leave_recording_mode(app);
+    if let Some(state) = app.try_state::<crate::state::AppState>() {
+        *state.session.lock() = None;
+    }
+}
+
 fn open_hud(app: &AppHandle) -> tauri::Result<()> {
     if let Some(existing) = app.get_webview_window(HUD) {
         existing.show()?;
@@ -55,8 +68,10 @@ fn open_hud(app: &AppHandle) -> tauri::Result<()> {
         .resizable(false)
         .decorations(false)
         .transparent(true)
+        .background_color(Color(0, 0, 0, 0))
         .shadow(false)
         .always_on_top(true)
+        .devtools(false)
         .skip_taskbar(true)
         // Recording follows the user between Spaces, so the controls must too.
         .visible_on_all_workspaces(true)
@@ -93,6 +108,9 @@ fn shortcuts() -> [(Shortcut, &'static str); 3] {
 }
 
 fn register_shortcuts(app: &AppHandle) {
+    if SHORTCUTS_REGISTERED.swap(true, Ordering::SeqCst) {
+        return;
+    }
     for (shortcut, action) in shortcuts() {
         let action = action.to_string();
         let _ = app
@@ -107,6 +125,9 @@ fn register_shortcuts(app: &AppHandle) {
 }
 
 fn unregister_shortcuts(app: &AppHandle) {
+    if !SHORTCUTS_REGISTERED.swap(false, Ordering::SeqCst) {
+        return;
+    }
     for (shortcut, _) in shortcuts() {
         let _ = app.global_shortcut().unregister(shortcut);
     }

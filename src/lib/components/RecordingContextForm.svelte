@@ -1,18 +1,13 @@
 <script lang="ts">
 	import Icon from "@iconify/svelte";
 	import type { Tone } from "$lib/types";
-	import { languageOptions } from "$lib/languages";
 	import { store } from "$lib/store.svelte";
 	import { Button } from "$lib/components/ui/button";
+	import { LIMITS } from "$lib/limits";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
-	import {
-		Select,
-		SelectContent,
-		SelectItem,
-		SelectTrigger,
-	} from "$lib/components/ui/select";
 	import { ToggleGroup, ToggleGroupItem } from "$lib/components/ui/toggle-group";
+	import LanguageSelect from "$lib/components/LanguageSelect.svelte";
 	import ProductsEditor from "$lib/components/ProductsEditor.svelte";
 
 	let {
@@ -27,7 +22,6 @@
 		language?: string;
 	} = $props();
 
-	const languages = $derived(languageOptions(language));
 </script>
 
 <div class="space-y-5">
@@ -36,7 +30,7 @@
 			<div>
 				<Label>What are you documenting?</Label>
 				<p class="text-xs text-(--text)/56">
-					Pick the product this guide is about. Vocabulary is managed in Settings.
+					Optional — pick a product to apply its vocabulary. Skip for general guides.
 				</p>
 			</div>
 			<Button
@@ -54,7 +48,7 @@
 
 	<div class="space-y-1.5">
 		<Label>Who is this for?</Label>
-		<Input bind:value={audience} placeholder="e.g. a new teammate who has never used this app" />
+		<Input bind:value={audience} maxlength={LIMITS.audience} placeholder="e.g. a new teammate who has never used this app" />
 	</div>
 
 	<div class="space-y-1.5">
@@ -67,17 +61,5 @@
 		</ToggleGroup>
 	</div>
 
-	<div class="space-y-1.5">
-		<Label>Language</Label>
-		<Select type="single" bind:value={language}>
-			<SelectTrigger class="w-full">
-				{language || "Select language"}
-			</SelectTrigger>
-			<SelectContent>
-				{#each languages as option (option)}
-					<SelectItem value={option} label={option} />
-				{/each}
-			</SelectContent>
-		</Select>
-	</div>
+	<LanguageSelect bind:value={language} />
 </div>

@@ -1,4 +1,5 @@
 pub mod detect;
+pub mod input;
 pub mod session;
 
 use base64::Engine;

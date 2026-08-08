@@ -62,22 +62,46 @@ pub enum Scope {
     Only(Vec<String>),
 }
 
+/// Optional provider/model for a single generation run without changing settings.
+#[derive(Debug, Clone, Default)]
+pub struct GenerationOverrides {
+    pub provider: Option<crate::models::Provider>,
+    pub model: Option<String>,
+}
+
 /// Builds a client from whatever the user has configured, so no caller needs to
 /// know which provider is active or where its credentials live.
-pub fn client_for(app: &AppHandle, settings: &Settings) -> Result<provider::Client> {
-    let config = settings.active();
-    let api_key = if settings.provider.needs_key() {
-        storage::get_api_key(app, settings.provider).ok_or(AppError::MissingApiKey)?
+pub fn client_for_overrides(
+    app: &AppHandle,
+    settings: &Settings,
+    overrides: &GenerationOverrides,
+) -> Result<provider::Client> {
+    let provider = overrides.provider.unwrap_or(settings.provider);
+    let config = settings.config_for(provider);
+    let model = overrides
+        .model
+        .as_ref()
+        .map(|m| m.trim().to_string())
+        .filter(|m| !m.is_empty())
+        .unwrap_or(config.model);
+    let api_key = if provider.needs_key() {
+        storage::get_api_key(app, provider).ok_or(AppError::MissingApiKey)?
     } else {
         String::new()
     };
-    provider::Client::new(settings.provider, config.model, config.base_url, api_key)
+    provider::Client::new(provider, model, config.base_url, api_key)
 }
 
-pub async fn run(app: AppHandle, scope: Scope, cancel: Arc<AtomicBool>) -> Result<()> {
+pub async fn run(
+    app: AppHandle,
+    scope: Scope,
+    cancel: Arc<AtomicBool>,
+    overrides: GenerationOverrides,
+) -> Result<()> {
     let state = app.state::<AppState>();
     let settings: Settings = state.settings.lock().clone();
-    let local = settings.provider.is_local();
+    let provider = overrides.provider.unwrap_or(settings.provider);
+    let local = provider.is_local();
 
     let project: Project = state
         .project
@@ -91,7 +115,7 @@ pub async fn run(app: AppHandle, scope: Scope, cancel: Arc<AtomicBool>) -> Resul
         return Ok(());
     }
 
-    let client = Arc::new(client_for(&app, &settings)?);
+    let client = Arc::new(client_for_overrides(&app, &settings, &overrides)?);
     let vocabulary = settings
         .resolve_product(project.product_id.as_deref())
         .map(|p| p.format_vocabulary())

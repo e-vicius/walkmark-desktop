@@ -46,7 +46,7 @@
 		<DialogHeader class="border-b border-(--text)/8 px-6 py-5">
 			<DialogTitle>Welcome to Steppy</DialogTitle>
 			<DialogDescription>
-				Start with Google Gemini, OpenAI, Claude, or OpenRouter — each has several models to
+				Start with Google Gemini, OpenAI, Claude, Mistral, or OpenRouter — each has several models to
 				choose from. Local models need Ollama installed.
 			</DialogDescription>
 		</DialogHeader>
@@ -72,6 +72,31 @@
 				</div>
 			{/if}
 
+			{#if store.permission.inputRequired && !store.permission.inputGranted}
+				<div class="rounded-3xl bg-(--bg) p-4">
+					<p class="text-sm font-medium text-(--text)">Accessibility access</p>
+					<p class="mt-1 text-xs text-(--text)/56">
+						Steppy watches clicks, typing, and scrolling to know when to capture a step. macOS
+						needs Accessibility permission for that.
+					</p>
+					<div class="mt-3 flex gap-2">
+						<Button
+							size="sm"
+							onclick={() => void api.requestPermission().then(() => store.refreshPermission())}
+						>
+							Grant access
+						</Button>
+						<Button
+							size="sm"
+							variant="ghost"
+							onclick={() => void api.openAccessibilitySettings()}
+						>
+							System Settings
+						</Button>
+					</div>
+				</div>
+			{/if}
+
 			<div class="space-y-3">
 				<div>
 					<p class="text-sm font-medium text-(--text)">Writing model</p>
@@ -80,7 +105,7 @@
 							Ready with {store.activeProvider?.name ?? "your provider"} · {store.activeConfig.model ||
 								store.activeProvider?.defaultModel}.
 						{:else if store.settings.provider === "ollama"}
-							Ollama is for offline models. Pick Google Gemini, OpenAI, Claude, or OpenRouter
+							Ollama is for offline models. Pick Google Gemini, OpenAI, Claude, Mistral, or OpenRouter
 							above for cloud models — Gemini has a generous free tier.
 						{:else if store.blockedReason}
 							{store.blockedReason}

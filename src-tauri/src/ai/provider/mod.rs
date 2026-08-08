@@ -8,6 +8,7 @@
 
 mod anthropic;
 mod gemini;
+mod mistral;
 mod ollama;
 mod openai;
 
@@ -85,7 +86,7 @@ impl Client {
         base_url: String,
         api_key: String,
     ) -> Result<Self> {
-        let model = model.trim().to_string();
+        let model = crate::limits::clamp_trim(&model, crate::limits::MODEL_ID);
         if model.is_empty() {
             return Err(AppError::Invalid(
                 "No model is selected. Choose one in Settings.".into(),
@@ -93,7 +94,9 @@ impl Client {
         }
 
         let base_url = {
-            let raw = base_url.trim().trim_end_matches('/');
+            let raw = crate::limits::clamp_trim(&base_url, crate::limits::BASE_URL)
+                .trim_end_matches('/')
+                .to_string();
             if raw.is_empty() {
                 provider.default_base_url().trim_end_matches('/').to_string()
             } else {
@@ -124,12 +127,15 @@ impl Client {
             provider,
             model,
             base_url,
-            api_key: api_key.trim().to_string(),
+            api_key: crate::limits::clamp_trim(&api_key, crate::limits::API_KEY),
         })
     }
 
     /// The cheapest possible round trip, so Settings can tell somebody their
     /// setup works before they sit through a whole generation run.
+    ///
+    /// Listing models only checks the key — it deliberately does not depend on
+    /// whichever model happens to be selected in Settings.
     pub async fn check(&self) -> Result<()> {
         if self.provider.needs_key() && self.api_key.is_empty() {
             return Err(AppError::MissingApiKey);
@@ -139,6 +145,45 @@ impl Client {
         if self.provider.is_local() {
             return ollama::check(&self.http, &self.base_url, &self.model).await;
         }
+
+        match self.provider {
+            Provider::Gemini => self.check_get(&gemini::models_url(&self.base_url)).await,
+            Provider::OpenAi | Provider::Mistral | Provider::OpenRouter => {
+                self.check_get(&openai::models_url(&self.base_url)).await
+            }
+            Provider::Compatible => match self.check_get(&openai::models_url(&self.base_url)).await {
+                Ok(()) => Ok(()),
+                Err(_) => self.check_chat().await,
+            },
+            Provider::Anthropic => self.check_chat().await,
+            Provider::Ollama => unreachable!(),
+        }
+    }
+
+    async fn check_get(&self, url: &str) -> Result<()> {
+        let request = self.authorize(self.http.get(url));
+        let response = request.send().await.map_err(AppError::Network)?;
+        let status = response.status();
+        let payload = response.text().await.unwrap_or_default();
+
+        if status.is_success() {
+            return Ok(());
+        }
+
+        let message = self
+            .error_message(&payload)
+            .unwrap_or_else(|| format!("{} returned HTTP {}.", self.provider.label(), status));
+
+        match status.as_u16() {
+            401 | 403 => Err(AppError::ApiRejected(format!(
+                "{message} Check that your {} API key is valid.",
+                self.provider.label()
+            ))),
+            _ => Err(AppError::ApiRejected(message)),
+        }
+    }
+
+    async fn check_chat(&self) -> Result<()> {
         self.send(&Ask {
             system: "",
             prompt: "Reply with the single word: ok",
@@ -206,6 +251,17 @@ impl Client {
     /// Sends the request, retrying only the failures worth retrying: rate
     /// limits, transient 5xx, and dropped connections.
     async fn send(&self, ask: &Ask<'_>) -> Result<String> {
+        if self.provider == Provider::Mistral
+            && !ask.images.is_empty()
+            && !crate::ai::catalog::model_has_vision(Provider::Mistral, &self.model)
+        {
+            return Err(AppError::Invalid(format!(
+                "The Mistral model `{}` cannot read screenshots. Pick Mistral Small or Large in \
+the write menu.",
+                self.model
+            )));
+        }
+
         let mut last: Option<AppError> = None;
 
         for attempt in 0..MAX_ATTEMPTS {
@@ -217,11 +273,9 @@ impl Client {
                 tokio::time::sleep(Duration::from_millis(base + jitter)).await;
             }
 
-            let request = self
-                .http
-                .post(self.url())
-                .json(&self.body(ask))
-                .header("content-type", "application/json");
+            // `.json()` already sets `Content-Type`. Setting it again breaks some
+            // providers (notably Mistral behind the system proxy) with opaque 422s.
+            let request = self.http.post(self.url()).json(&self.body(ask));
             let request = self.authorize(request);
 
             let response = match request.send().await {
@@ -283,7 +337,7 @@ not have access to it.",
             Provider::Gemini => gemini::url(&self.base_url, &self.model),
             Provider::Anthropic => anthropic::url(&self.base_url),
             Provider::Ollama => ollama::url(&self.base_url),
-            Provider::OpenAi | Provider::OpenRouter | Provider::Compatible => openai::url(&self.base_url),
+            Provider::OpenAi | Provider::OpenRouter | Provider::Mistral | Provider::Compatible => openai::url(&self.base_url),
         }
     }
 
@@ -306,6 +360,7 @@ not have access to it.",
             Provider::Anthropic => anthropic::body(&self.model, ask),
             Provider::Ollama => ollama::body(&self.model, ask),
             Provider::OpenAi => openai::body(&self.model, ask, openai::Flavor::OpenAi),
+            Provider::Mistral => mistral::body(&self.model, ask),
             Provider::OpenRouter | Provider::Compatible => {
                 openai::body(&self.model, ask, openai::Flavor::Compatible)
             }
@@ -318,30 +373,32 @@ not have access to it.",
             Provider::Anthropic => anthropic::text(payload),
             Provider::Ollama => ollama::text(payload),
             Provider::OpenAi | Provider::OpenRouter | Provider::Compatible => openai::text(payload),
+            Provider::Mistral => mistral::text(payload),
         }
     }
 
     fn error_message(&self, payload: &str) -> Option<String> {
-        match self.provider {
-            // Gemini, OpenAI and Anthropic all nest the human-readable string
-            // under `error`, they just disagree on the surrounding shape.
-            Provider::Gemini
-            | Provider::OpenAi
-            | Provider::OpenRouter
-            | Provider::Compatible
-            | Provider::Anthropic => {
-                let root: Value = serde_json::from_str(payload).ok()?;
-                root.pointer("/error/message")
-                    .or_else(|| root.get("error"))
-                    .and_then(Value::as_str)
-                    .map(str::to_owned)
-            }
-            Provider::Ollama => serde_json::from_str::<Value>(payload)
-                .ok()?
-                .get("error")?
-                .as_str()
-                .map(str::to_owned),
+        let root: Value = serde_json::from_str(payload).ok()?;
+
+        if let Some(text) = root.pointer("/error/message").and_then(Value::as_str) {
+            return Some(text.to_owned());
         }
+
+        if let Some(message) = root.get("message") {
+            if let Some(text) = message.as_str() {
+                return Some(text.to_owned());
+            }
+            if let Some(formatted) = format_validation_errors(message.get("detail").unwrap_or(message))
+            {
+                return Some(formatted);
+            }
+        }
+
+        if let Some(formatted) = format_validation_errors(root.get("detail")?) {
+            return Some(formatted);
+        }
+
+        root.get("error").and_then(Value::as_str).map(str::to_owned)
     }
 
     fn unreachable(&self) -> AppError {
@@ -349,6 +406,37 @@ not have access to it.",
             "Could not reach Ollama at {}. Make sure it is installed and running.",
             self.base_url
         ))
+    }
+}
+
+fn format_validation_errors(detail: &Value) -> Option<String> {
+    let items = detail.as_array()?;
+    let messages: Vec<String> = items
+        .iter()
+        .filter_map(|item| {
+            let msg = item.get("msg")?.as_str()?;
+            let loc = item
+                .get("loc")
+                .and_then(Value::as_array)
+                .map(|parts| {
+                    parts
+                        .iter()
+                        .filter_map(Value::as_str)
+                        .filter(|part| *part != "body")
+                        .collect::<Vec<_>>()
+                        .join(".")
+                })
+                .filter(|path| !path.is_empty());
+            Some(match loc {
+                Some(path) => format!("{msg} ({path})"),
+                None => msg.to_owned(),
+            })
+        })
+        .collect();
+    if messages.is_empty() {
+        None
+    } else {
+        Some(messages.join("; "))
     }
 }
 
@@ -494,6 +582,21 @@ mod tests {
             Err(e) => e.to_string(),
             Ok(_) => panic!("expected the client to be rejected"),
         }
+    }
+
+    #[test]
+    fn formats_mistral_validation_errors() {
+        let payload = r#"{"object":"error","message":{"detail":[{"type":"extra_forbidden","loc":["body","temperature"],"msg":"Extra inputs are not permitted","input":0.35}]},"type":"invalid_request_error"}"#;
+        let client = Client::new(
+            Provider::Mistral,
+            "mistral-small-latest".into(),
+            String::new(),
+            "k".into(),
+        )
+        .unwrap();
+        let message = client.error_message(payload).unwrap();
+        assert!(message.contains("Extra inputs are not permitted"), "{message}");
+        assert!(message.contains("temperature"), "{message}");
     }
 
     #[test]

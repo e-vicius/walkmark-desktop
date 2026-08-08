@@ -6,8 +6,15 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
+	import {
+		Select,
+		SelectContent,
+		SelectItem,
+		SelectTrigger,
+	} from "$lib/components/ui/select";
 	import LocalModels from "$lib/components/LocalModels.svelte";
 	import ApiKeyGuide from "$lib/components/ApiKeyGuide.svelte";
+	import { LIMITS } from "$lib/limits";
 
 	let { class: className = "" }: { class?: string } = $props();
 
@@ -17,6 +24,10 @@
 	const provider = $derived(store.catalog.providers.find((p) => p.id === store.settings.provider));
 	const hasKey = $derived(store.catalog.configured.includes(store.settings.provider));
 	const selectedModel = $derived(store.activeConfig.model);
+	const suggestedIds = $derived(new Set(provider?.models.map((m) => m.id) ?? []));
+	const usingCustomModel = $derived(
+		Boolean(selectedModel && provider && !suggestedIds.has(selectedModel)),
+	);
 
 	async function saveKey() {
 		if (!provider || !keyDraft.trim()) return;
@@ -35,24 +46,34 @@
 	}
 </script>
 
-<div class="grid min-h-0 grid-cols-[128px_minmax(0,1fr)] gap-4 {className}">
-	<nav class="flex flex-col gap-1 overflow-y-auto">
-		{#each store.catalog.providers as p (p.id)}
-			<button
-				type="button"
-				class="rounded-2xl px-3 py-2 text-left text-sm transition-colors {store.settings.provider ===
-				p.id
-					? 'bg-(--text)/8 text-(--text)'
-					: 'text-(--text)/56 hover:bg-(--text)/5'}"
-				onclick={() => void store.updateSettings({ provider: p.id as ProviderId })}
-			>
-				{p.name}
-			</button>
-		{/each}
-	</nav>
+<div class="space-y-4 {className}">
+	<div class="space-y-1.5">
+		<Label>Provider</Label>
+		<Select
+			type="single"
+			value={store.settings.provider}
+			onValueChange={(value) => value && void store.updateSettings({ provider: value as ProviderId })}
+		>
+			<SelectTrigger class="w-full">
+				{provider?.name ?? "Select a provider"}
+			</SelectTrigger>
+			<SelectContent>
+				{#each store.catalog.providers as p (p.id)}
+					<SelectItem value={p.id} label={p.name}>
+						<span class="flex items-center gap-2">
+							<span>{p.name}</span>
+							{#if store.catalog.configured.includes(p.id)}
+								<Badge class="py-0">Ready</Badge>
+							{/if}
+						</span>
+					</SelectItem>
+				{/each}
+			</SelectContent>
+		</Select>
+	</div>
 
 	{#if provider}
-		<div class="min-h-0 min-w-0 space-y-4">
+		<div class="space-y-4 border-t border-(--text)/8 pt-4">
 			<p class="text-sm text-(--text)/56">{provider.blurb}</p>
 
 			{#if provider.local}
@@ -66,6 +87,7 @@
 						<Label>Server address</Label>
 						<Input
 							value={store.settings.providers[provider.id]?.baseUrl ?? ""}
+							maxlength={LIMITS.baseUrl}
 							placeholder={provider.defaultBaseUrl}
 							oninput={(e) =>
 								void store.configureProvider(provider.id, {
@@ -98,16 +120,32 @@
 								</button>
 							{/each}
 						</div>
-					{:else}
+					{/if}
+
+					<div
+						class="space-y-1.5 {provider.models.length > 0
+							? 'border-t border-(--text)/8 pt-3'
+							: ''}"
+					>
+						{#if provider.models.length > 0}
+							<p class="text-xs text-(--text)/56">Or enter a model ID</p>
+						{/if}
 						<Input
-							value={store.settings.providers[provider.id]?.model || provider.defaultModel}
-							placeholder="Model name"
+							value={store.settings.providers[provider.id]?.model ?? provider.defaultModel}
+							maxlength={LIMITS.modelId}
+							placeholder={provider.id === "openrouter"
+								? "provider/model-name"
+								: "Model ID"}
+							class="font-mono text-xs {usingCustomModel ? 'ring-1 ring-(--text)/20' : ''}"
 							oninput={(e) =>
 								void store.configureProvider(provider.id, {
 									model: (e.currentTarget as HTMLInputElement).value,
 								})}
 						/>
-					{/if}
+						{#if usingCustomModel}
+							<p class="text-xs text-(--text)/56">Using custom model: {selectedModel}</p>
+						{/if}
+					</div>
 				</div>
 
 				{#if provider.needsKey}
@@ -121,6 +159,7 @@
 							<Input
 								type="password"
 								bind:value={keyDraft}
+								maxlength={LIMITS.apiKey}
 								class="font-mono text-xs"
 								placeholder="Paste your key"
 							/>

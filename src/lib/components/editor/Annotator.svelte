@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { AnnotationKind } from '$lib/types';
+	import type { AnnotationKind, AnnotationStroke } from '$lib/types';
 
 	export type Tool = 'select' | AnnotationKind;
 
@@ -8,30 +8,35 @@
 		label: string;
 		icon: string;
 		hint: string;
+		shortcut: string;
 	}[] = [
 		{
 			value: 'select',
 			label: 'Select',
 			icon: 'lucide:mouse-pointer-2',
-			hint: 'Click a box to select it'
+			hint: 'Select, move, or delete a region',
+			shortcut: 'V'
 		},
 		{
 			value: 'blur',
 			label: 'Blur',
-			icon: 'lucide:square-dashed',
-			hint: 'Pixelate a region'
+			icon: 'lucide:scan',
+			hint: 'Pixelate sensitive details',
+			shortcut: 'B'
 		},
 		{
 			value: 'redact',
-			label: 'Black out',
-			icon: 'lucide:eraser',
-			hint: 'Cover a region completely'
+			label: 'Cover',
+			icon: 'lucide:square',
+			hint: 'Paint over a region completely',
+			shortcut: 'R'
 		},
 		{
 			value: 'highlight',
 			label: 'Highlight',
 			icon: 'lucide:highlighter',
-			hint: 'Draw attention to a region'
+			hint: 'Draw a coloured box around something',
+			shortcut: 'H'
 		}
 	];
 </script>
@@ -40,15 +45,28 @@
 	import Icon from '@iconify/svelte';
 	import type { Annotation, Rect } from '$lib/types';
 	import { cn } from '$lib/utils';
+	import {
+		annotationClasses,
+		annotationStyle,
+		defaultColor,
+		draftStyle
+	} from './annotation-styles';
 
 	let {
 		annotations,
 		tool,
+		color,
+		stroke = 'medium',
+		selected = $bindable<string | null>(null),
 		onChange,
 		class: className = ''
 	}: {
 		annotations: Annotation[];
 		tool: Tool;
+		/** Colour applied to newly drawn highlight / cover regions. */
+		color?: string;
+		stroke?: AnnotationStroke;
+		selected?: string | null;
 		onChange: (annotations: Annotation[]) => void;
 		class?: string;
 	} = $props();
@@ -57,7 +75,6 @@
 
 	let surfaceRef = $state<HTMLDivElement | null>(null);
 	let draft = $state<Rect | null>(null);
-	let selected = $state<string | null>(null);
 	let origin = $state<{ x: number; y: number } | null>(null);
 
 	$effect(() => {
@@ -119,10 +136,17 @@
 		if (!rect || tool === 'select') return;
 		if (rect.w < MIN_SIZE || rect.h < MIN_SIZE) return;
 
-		onChange([
-			...annotations,
-			{ id: crypto.randomUUID().slice(0, 12), kind: tool, rect }
-		]);
+		const kind = tool;
+		const next: Annotation = {
+			id: crypto.randomUUID().slice(0, 12),
+			kind,
+			rect
+		};
+		const fill = color ?? defaultColor(kind);
+		if (fill) next.color = fill;
+		if (kind === 'highlight') next.stroke = stroke;
+
+		onChange([...annotations, next]);
 	}
 </script>
 
@@ -142,25 +166,20 @@
 	{#each annotations as annotation (annotation.id)}
 		{@const isSelected = selected === annotation.id}
 		{@const interactive = tool === 'select'}
-		<div
-			role={interactive ? 'button' : undefined}
-			tabindex={interactive ? 0 : -1}
-			onpointerdown={(event) => {
-				if (!interactive) return;
-				event.stopPropagation();
-				selected = annotation.id;
-			}}
-			style={toStyle(annotation.rect)}
-			class={cn(
-				'group absolute rounded-[3px] transition-shadow',
-				interactive ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none',
-				annotation.kind === 'blur' && 'bg-black/5 backdrop-blur-[7px] backdrop-saturate-50',
-				annotation.kind === 'redact' && 'bg-[#18181b]',
-				annotation.kind === 'highlight' && 'border-2 border-(--text) bg-(--text)/12',
-				isSelected && 'ring-2 ring-(--text) ring-offset-1 ring-offset-black/20'
-			)}
-		>
-			{#if interactive}
+		{#if interactive}
+			<div
+				role="button"
+				tabindex="0"
+				onpointerdown={(event) => {
+					event.stopPropagation();
+					selected = annotation.id;
+				}}
+				style="{toStyle(annotation.rect)};{annotationStyle(annotation) ?? ''}"
+				class={cn(
+					annotationClasses(annotation, isSelected),
+					'pointer-events-auto cursor-pointer'
+				)}
+			>
 				<button
 					type="button"
 					onpointerdown={(event) => {
@@ -173,14 +192,25 @@
 				>
 					<Icon icon="lucide:trash-2" class="size-2.5" aria-hidden="true" />
 				</button>
-			{/if}
-		</div>
+			</div>
+		{:else}
+			<div
+				aria-hidden="true"
+				style="{toStyle(annotation.rect)};{annotationStyle(annotation) ?? ''}"
+				class={cn(annotationClasses(annotation, isSelected), 'pointer-events-none')}
+			></div>
+		{/if}
 	{/each}
 
 	{#if draft && tool !== 'select'}
 		<div
-			class="pointer-events-none absolute rounded-[3px] border-2 border-(--text) bg-(--text)/20"
-			style={toStyle(draft)}
+			class={cn(
+				'pointer-events-none absolute rounded-[3px] border-2',
+				tool === 'blur' && 'border-(--text)/60 bg-(--text)/15',
+				tool === 'highlight' && 'border-(--text)/60',
+				tool === 'redact' && 'border-(--text)/40'
+			)}
+			style="{toStyle(draft)};{draftStyle(tool, color) ?? ''}"
 		></div>
 	{/if}
 </div>

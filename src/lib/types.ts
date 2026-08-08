@@ -24,10 +24,17 @@ export interface Rect {
   h: number;
 }
 
+/** Highlight outline weight. Omitted means medium. */
+export type AnnotationStroke = "thin" | "medium" | "thick";
+
 export interface Annotation {
   id: string;
   kind: AnnotationKind;
   rect: Rect;
+  /** `#rrggbb` — used for highlight outlines and redact fills. */
+  color?: string;
+  /** Highlight outline weight. Ignored for blur and redact. */
+  stroke?: AnnotationStroke;
 }
 
 export type StepStatus = "draft" | "queued" | "generating" | "ready" | "failed";
@@ -74,10 +81,14 @@ export type Tone = "neutral" | "friendly" | "formal" | "playful";
 
 export interface CaptureSettings {
   sampleIntervalMs: number;
-  /** 0 = only large changes become steps, 1 = almost every change does. */
+  /** Used when visual fallback is on. 0 = huge changes only, 1 = almost everything. */
   sensitivity: number;
   minGapMs: number;
   settle: boolean;
+  /** Capture on screen changes when input monitoring is unavailable. */
+  visualFallback?: boolean;
+  /** Delay after a click, key press, or scroll before the screenshot is taken. */
+  inputSettleMs?: number;
   maxWidth: number;
   countdownSecs: number;
   hideWindow: boolean;
@@ -87,6 +98,7 @@ export type ProviderId =
   | "gemini"
   | "openai"
   | "anthropic"
+  | "mistral"
   | "ollama"
   | "openrouter"
   | "compatible";
@@ -125,7 +137,7 @@ export interface Settings {
   defaultProductId?: string | null;
 }
 
-export type RecordingState = "idle" | "counting" | "recording" | "paused";
+export type RecordingState = "idle" | "counting" | "recording" | "paused" | "stopping";
 
 export interface RecordingTick {
   state: RecordingState;
@@ -171,6 +183,8 @@ export interface PermissionStatus {
   granted: boolean;
   /** Only macOS gates screen capture today. */
   required: boolean;
+  inputGranted: boolean;
+  inputRequired: boolean;
 }
 
 /** Shape of every error crossing the IPC boundary. */
@@ -207,6 +221,8 @@ export interface ModelInfo {
   id: string;
   name: string;
   note: string;
+  /** Can read screenshots in a write request. Defaults to true when omitted. */
+  vision?: boolean;
   tier: ModelTier;
 }
 

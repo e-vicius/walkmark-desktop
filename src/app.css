@@ -1,22 +1,30 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@source "../src/**/*.{html,js,svelte,ts}";
+
 html,
 body,
 #root {
 	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
 }
 
 body {
 	margin: 0;
 	user-select: none;
-	overscroll-behavior: none;
 }
 
 input,
 textarea,
 [contenteditable] {
 	user-select: text;
+}
+
+img {
+	-webkit-user-drag: none;
+	user-drag: none;
 }
 
 .drag-region,
@@ -41,8 +49,9 @@ html[data-platform="macos"] .titlebar {
 }
 
 [data-window="hud"],
-[data-window="hud"] body {
-	background: transparent;
+[data-window="hud"] body,
+[data-window="hud"] #root {
+	background: transparent !important;
 }
 
 /* lily design system — written into your stylesheet by the lily CLI; yours to edit. */
@@ -77,6 +86,12 @@ html[data-platform="macos"] .titlebar {
 @layer base {
 	html {
 		scroll-behavior: smooth;
+	}
+
+	*,
+	*::before,
+	*::after {
+		overscroll-behavior: none;
 	}
 
 	:root {

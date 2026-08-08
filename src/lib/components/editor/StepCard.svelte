@@ -6,8 +6,11 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
+	import { LIMITS } from '$lib/limits';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import Annotator, { TOOLS, type Tool } from './Annotator.svelte';
 	import FrameImage from './FrameImage.svelte';
+	import ImageEditorOverlay from './ImageEditorOverlay.svelte';
 	import * as api from '$lib/api';
 
 	let { step, index }: { step: Step; index: number } = $props();
@@ -16,7 +19,7 @@
 	const active = $derived(store.focused === step.id);
 	const selected = $derived(store.selection.includes(step.id));
 	const writing = $derived(step.status === 'queued' || step.status === 'generating');
-	const ready = $derived(store.canWrite);
+	const ready = $derived(store.canWriteWith(store.writeProvider) && Boolean(store.writeModel));
 
 	const number = $derived(
 		project.steps.slice(0, index + 1).filter((s) => s.include).length
@@ -24,6 +27,17 @@
 
 	let tool = $state<Tool>('select');
 	let showFrames = $state(false);
+	let editingImage = $state(false);
+
+	function openImageEditor(nextTool: Tool = tool) {
+		tool = nextTool;
+		editingImage = true;
+	}
+
+	function closeImageEditor() {
+		editingImage = false;
+		tool = 'select';
+	}
 
 	// Title draft
 	let titleDraft = $state('');
@@ -92,13 +106,14 @@
 		<div class="min-w-0 flex-1">
 			{#if writing}
 				<div class="flex flex-col gap-2 py-1">
-					<div class="h-4 w-2/3 animate-pulse rounded bg-(--text)/8"></div>
-					<div class="h-3 w-full animate-pulse rounded bg-(--text)/8"></div>
-					<div class="h-3 w-4/5 animate-pulse rounded bg-(--text)/8"></div>
+					<Skeleton class="h-4 w-2/3 rounded-lg" />
+					<Skeleton class="h-3 w-full rounded-lg" />
+					<Skeleton class="h-3 w-4/5 rounded-lg" />
 				</div>
 			{:else}
 				<input
 					bind:value={titleDraft}
+					maxlength={LIMITS.stepTitle}
 					placeholder="Name this step"
 					onfocus={() => (titleEditing = true)}
 					onblur={() => {
@@ -118,6 +133,7 @@
 					bind:this={bodyRef}
 					rows={1}
 					bind:value={bodyDraft}
+					maxlength={LIMITS.stepBody}
 					placeholder={ready
 						? 'Describe what the reader should do — or have it written for you.'
 						: 'Describe what the reader should do here.'}
@@ -197,20 +213,28 @@
 		<div class="relative">
 			<div class="relative overflow-hidden rounded-2xl bg-(--text)/5">
 				{#if frameUrl}
-					<img
-						src={frameUrl}
-						alt="Screenshot for step: {step.title || 'untitled'}"
-						draggable={false}
-						class="block w-full"
-					/>
+					<button
+						type="button"
+						onclick={() => openImageEditor()}
+						class="group/image block w-full cursor-zoom-in text-left"
+						aria-label="Open screenshot editor"
+					>
+						<img
+							src={frameUrl}
+							alt="Screenshot for step: {step.title || 'untitled'}"
+							draggable={false}
+							class="block w-full"
+						/>
+					</button>
 				{:else}
-					<div class="aspect-16/10 w-full animate-pulse bg-(--text)/8" aria-hidden="true"></div>
+					<Skeleton class="aspect-16/10 w-full rounded-none" />
 				{/if}
 
 				<Annotator
 					annotations={step.annotations}
-					{tool}
+					tool="select"
 					onChange={(annotations) => patchStep({ annotations })}
+					class="pointer-events-none"
 				/>
 			</div>
 
@@ -221,32 +245,26 @@
 					<button
 						type="button"
 						onpointerdown={(event) => event.stopPropagation()}
-						onclick={() => (tool = t.value)}
+						onclick={() => openImageEditor(t.value)}
 						title="{t.label} — {t.hint}"
 						aria-label={t.label}
-						aria-pressed={tool === t.value}
-						class={cn(
-							'grid size-7 place-items-center rounded-lg transition-colors',
-							tool === t.value
-								? 'bg-white text-black'
-								: 'text-white/70 hover:bg-white/15 hover:text-white'
-						)}
+						class="grid size-7 place-items-center rounded-lg text-white/70 transition-colors hover:bg-white/15 hover:text-white"
 					>
 						<Icon icon={t.icon} class="size-3.5" aria-hidden="true" />
 					</button>
 				{/each}
 
-				{#if step.annotations.length > 0}
-					<span class="mx-0.5 h-4 w-px bg-white/15"></span>
-					<button
-						type="button"
-						onpointerdown={(event) => event.stopPropagation()}
-						onclick={() => patchStep({ annotations: [] })}
-						class="rounded-lg px-2 py-1 text-[11.5px] text-white/70 hover:bg-white/15 hover:text-white"
-					>
-						Clear {step.annotations.length}
-					</button>
-				{/if}
+				<span class="mx-0.5 h-4 w-px bg-white/15"></span>
+				<button
+					type="button"
+					onpointerdown={(event) => event.stopPropagation()}
+					onclick={() => openImageEditor()}
+					title="Expand screenshot editor"
+					aria-label="Expand screenshot editor"
+					class="grid size-7 place-items-center rounded-lg text-white/70 transition-colors hover:bg-white/15 hover:text-white"
+				>
+					<Icon icon="lucide:maximize-2" class="size-3.5" aria-hidden="true" />
+				</button>
 			</div>
 
 			<div
@@ -278,6 +296,7 @@
 			{#if showFrames}
 				{@const options = [step.frame, ...step.alternates].sort()}
 				<div
+					role="group"
 					onpointerdown={(event) => event.stopPropagation()}
 					class="absolute inset-x-2 bottom-2 animate-in fade-in slide-in-from-bottom-2 rounded-2xl border border-white/10 bg-black/80 p-2 shadow-lg backdrop-blur-xl"
 				>
@@ -327,5 +346,15 @@
 				</div>
 			{/if}
 		</div>
+
+		<ImageEditorOverlay
+			open={editingImage}
+			{frameUrl}
+			title={step.title}
+			annotations={step.annotations}
+			bind:tool
+			onChange={(annotations) => patchStep({ annotations })}
+			onClose={closeImageEditor}
+		/>
 	</div>
 </li>

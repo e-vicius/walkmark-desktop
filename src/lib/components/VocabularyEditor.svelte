@@ -5,6 +5,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
+	import { LIMITS } from "$lib/limits";
 
 	let {
 		terms,
@@ -45,12 +46,14 @@
 			<div class="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
 				<Input
 					value={entry.term}
+					maxlength={LIMITS.vocabularyTerm}
 					placeholder="Term"
 					oninput={(e) =>
 						updateTerm(entry.id, { term: (e.currentTarget as HTMLInputElement).value })}
 				/>
 				<Input
 					value={entry.explanation}
+					maxlength={LIMITS.vocabularyExplanation}
 					placeholder="What it is"
 					oninput={(e) =>
 						updateTerm(entry.id, {

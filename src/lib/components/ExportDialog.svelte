@@ -87,6 +87,7 @@
 
 	const included = $derived(project?.steps.filter((s) => s.include) ?? []);
 	const unwritten = $derived(included.filter((s) => s.status !== 'ready').length);
+	const tocAvailable = $derived(included.length > 2);
 	const format = $derived(FORMATS[options.format]);
 	const imageWidthStr = $derived(String(options.imageWidth));
 
@@ -137,7 +138,9 @@
 
 {#if project}
 	<Dialog {open} onOpenChange={handleOpenChange}>
-		<DialogContent class="relative max-w-[760px] overflow-hidden">
+		<DialogContent
+			class="flex max-h-[min(720px,calc(100vh-2rem))] w-[calc(100%-2rem)] max-w-[760px] flex-col gap-0 overflow-hidden p-0"
+		>
 			{#if exporting}
 				<div
 					class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-(--bg-elevated)/90 backdrop-blur-sm"
@@ -150,130 +153,133 @@
 				</div>
 			{/if}
 
-			<DialogHeader>
+			<DialogHeader class="shrink-0 px-6 pt-6 pb-4">
 				<DialogTitle>Export this document</DialogTitle>
 				<DialogDescription>
 					{pluralize(included.length, 'step')} will be included.
 				</DialogDescription>
 			</DialogHeader>
 
-			{#if unwritten > 0}
-				<div class="mb-5 rounded-2xl bg-amber-500/10 px-3.5 py-2.5">
-					<p class="text-[12.5px] leading-relaxed text-amber-700 dark:text-amber-400">
-						{pluralize(unwritten, 'step has', 'steps have')} no instructions yet. They'll appear
-						with a placeholder title and just the screenshot.
-					</p>
-				</div>
-			{/if}
+			<div class="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
+				{#if unwritten > 0}
+					<div class="mb-5 rounded-2xl bg-amber-500/10 px-3.5 py-2.5">
+						<p class="text-[12.5px] leading-relaxed text-amber-700 dark:text-amber-400">
+							{pluralize(unwritten, 'step has', 'steps have')} no instructions yet. They'll appear
+							with a placeholder title and just the screenshot.
+						</p>
+					</div>
+				{/if}
 
-			<div class="grid gap-2 sm:grid-cols-3">
-				{#each Object.keys(FORMATS) as key (key)}
-					{@const entry = FORMATS[key as ExportFormat]}
-					{@const active = options.format === key}
-					<button
-						type="button"
-						onclick={() => patch({ format: key as ExportFormat })}
-						aria-pressed={active}
-						class={cn(
-							'rounded-2xl p-3.5 text-left transition-colors',
-							active ? 'bg-(--text)/12' : 'bg-(--text)/5 hover:bg-(--text)/8'
-						)}
-					>
-						<Icon
-							icon={entry.icon}
-							class={cn('mb-2 size-4', active ? 'text-(--text)' : 'text-(--text)/56')}
+				<div class="grid gap-2 sm:grid-cols-3">
+					{#each Object.keys(FORMATS) as key (key)}
+						{@const entry = FORMATS[key as ExportFormat]}
+						{@const active = options.format === key}
+						<button
+							type="button"
+							onclick={() => patch({ format: key as ExportFormat })}
+							aria-pressed={active}
+							class={cn(
+								'rounded-2xl p-3.5 text-left transition-colors',
+								active ? 'bg-(--text)/12' : 'bg-(--text)/5 hover:bg-(--text)/8'
+							)}
+						>
+							<Icon
+								icon={entry.icon}
+								class={cn('mb-2 size-4', active ? 'text-(--text)' : 'text-(--text)/56')}
+							/>
+							<p class="text-[13px] font-medium">{entry.label}</p>
+							<p class="mt-0.5 text-[11.5px] tracking-wide text-(--text)/40 uppercase">
+								.{entry.extension}
+							</p>
+						</button>
+					{/each}
+				</div>
+
+				<p class="mt-3 text-[12.5px] leading-relaxed text-(--text)/56">{format.blurb}</p>
+
+				<div class="mt-6 flex flex-col gap-4 border-t border-(--text)/8 pt-5">
+					<div class="flex items-center justify-between gap-4">
+						<div>
+							<Label>Include screenshots</Label>
+							<p class="text-xs text-(--text)/56">Turn off for a text-only checklist.</p>
+						</div>
+						<Switch
+							checked={options.includeImages}
+							onCheckedChange={(includeImages) => patch({ includeImages })}
 						/>
-						<p class="text-[13px] font-medium">{entry.label}</p>
-						<p class="mt-0.5 text-[11.5px] tracking-wide text-(--text)/40 uppercase">
-							.{entry.extension}
-						</p>
-					</button>
-				{/each}
+					</div>
+
+					{#if options.includeImages}
+						<div class="flex flex-col gap-2">
+							<Label>Screenshot size</Label>
+							<p class="text-xs text-(--text)/56">
+								Larger images keep small UI text readable but make the file bigger.
+							</p>
+							<Select
+								type="single"
+								value={imageWidthStr}
+								onValueChange={(v) => v && patch({ imageWidth: Number(v) })}
+							>
+								<SelectTrigger class="w-full">
+									{IMAGE_WIDTHS.find((w) => w.value === imageWidthStr)?.label ?? 'Select size'}
+								</SelectTrigger>
+								<SelectContent>
+									{#each IMAGE_WIDTHS as option (option.value)}
+										<SelectItem value={option.value} label={option.label} />
+									{/each}
+								</SelectContent>
+							</Select>
+						</div>
+					{/if}
+
+					<div class="flex items-center justify-between gap-4">
+						<Label>Include the summary</Label>
+						<Switch
+							checked={options.includeSummary}
+							onCheckedChange={(includeSummary) => patch({ includeSummary })}
+						/>
+					</div>
+
+					<div class="flex items-center justify-between gap-4">
+						<Label>Include “Before you start”</Label>
+						<Switch
+							checked={options.includePrerequisites}
+							onCheckedChange={(includePrerequisites) => patch({ includePrerequisites })}
+						/>
+					</div>
+
+					<div class="flex items-center justify-between gap-4">
+						<div class={cn(!tocAvailable && 'opacity-56')}>
+							<Label>Include a table of contents</Label>
+							<p class="text-xs text-(--text)/56">Only added when there are more than two steps.</p>
+						</div>
+						<Switch
+							disabled={!tocAvailable}
+							checked={tocAvailable && options.includeToc}
+							onCheckedChange={(includeToc) => patch({ includeToc })}
+						/>
+					</div>
+
+					{#if options.format === 'html'}
+						<div class="flex flex-col gap-2">
+							<Label>Colour scheme</Label>
+							<ToggleGroup
+								value={options.theme}
+								onValueChange={(theme) => theme && patch({ theme: theme as ExportOptions['theme'] })}
+								type="single"
+								variant="outline"
+								class="w-full"
+							>
+								<ToggleGroupItem value="auto" class="flex-1">Match the reader</ToggleGroupItem>
+								<ToggleGroupItem value="light" class="flex-1">Light</ToggleGroupItem>
+								<ToggleGroupItem value="dark" class="flex-1">Dark</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
+					{/if}
+				</div>
 			</div>
 
-			<p class="mt-3 text-[12.5px] leading-relaxed text-(--text)/56">{format.blurb}</p>
-
-			<div class="mt-6 flex flex-col gap-4 border-t border-(--text)/8 pt-5">
-				<div class="flex items-center justify-between gap-4">
-					<div>
-						<Label>Include screenshots</Label>
-						<p class="text-xs text-(--text)/56">Turn off for a text-only checklist.</p>
-					</div>
-					<Switch
-						checked={options.includeImages}
-						onCheckedChange={(includeImages) => patch({ includeImages })}
-					/>
-				</div>
-
-				{#if options.includeImages}
-					<div class="flex flex-col gap-2">
-						<Label>Screenshot size</Label>
-						<p class="text-xs text-(--text)/56">
-							Larger images keep small UI text readable but make the file bigger.
-						</p>
-						<Select
-							type="single"
-							value={imageWidthStr}
-							onValueChange={(v) => v && patch({ imageWidth: Number(v) })}
-						>
-							<SelectTrigger class="w-full">
-								{IMAGE_WIDTHS.find((w) => w.value === imageWidthStr)?.label ?? 'Select size'}
-							</SelectTrigger>
-							<SelectContent>
-								{#each IMAGE_WIDTHS as option (option.value)}
-									<SelectItem value={option.value} label={option.label} />
-								{/each}
-							</SelectContent>
-						</Select>
-					</div>
-				{/if}
-
-				<div class="flex items-center justify-between gap-4">
-					<Label>Include the summary</Label>
-					<Switch
-						checked={options.includeSummary}
-						onCheckedChange={(includeSummary) => patch({ includeSummary })}
-					/>
-				</div>
-
-				<div class="flex items-center justify-between gap-4">
-					<Label>Include “Before you start”</Label>
-					<Switch
-						checked={options.includePrerequisites}
-						onCheckedChange={(includePrerequisites) => patch({ includePrerequisites })}
-					/>
-				</div>
-
-				<div class="flex items-center justify-between gap-4">
-					<div>
-						<Label>Include a table of contents</Label>
-						<p class="text-xs text-(--text)/56">Only added when there are more than two steps.</p>
-					</div>
-					<Switch
-						checked={options.includeToc}
-						onCheckedChange={(includeToc) => patch({ includeToc })}
-					/>
-				</div>
-
-				{#if options.format === 'html'}
-					<div class="flex flex-col gap-2">
-						<Label>Colour scheme</Label>
-						<ToggleGroup
-							value={options.theme}
-							onValueChange={(theme) => theme && patch({ theme: theme as ExportOptions['theme'] })}
-							type="single"
-							variant="outline"
-							class="w-full"
-						>
-							<ToggleGroupItem value="auto" class="flex-1">Match the reader</ToggleGroupItem>
-							<ToggleGroupItem value="light" class="flex-1">Light</ToggleGroupItem>
-							<ToggleGroupItem value="dark" class="flex-1">Dark</ToggleGroupItem>
-						</ToggleGroup>
-					</div>
-				{/if}
-			</div>
-
-			<DialogFooter class="sm:justify-between">
+			<DialogFooter class="shrink-0 border-t border-(--text)/8 px-6 py-4 sm:justify-between">
 				<Button variant="ghost" class="mr-auto" disabled={exporting} onclick={() => void copy()}>
 					<Icon icon="lucide:copy" class="size-3.5" />
 					Copy as Markdown

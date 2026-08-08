@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as api from '$lib/api';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { cn } from '$lib/utils';
 
 	let {
@@ -46,7 +47,7 @@
 </script>
 
 {#if !url}
-	<div class={cn('animate-pulse bg-(--text)/8', className)} aria-hidden="true"></div>
+	<Skeleton class={className} />
 {:else}
 	<img
 		src={url}

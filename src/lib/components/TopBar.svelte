@@ -4,9 +4,11 @@
 	import { pluralize } from "$lib/format";
 	import { isMacOS } from "$lib/window";
 	import { Button } from "$lib/components/ui/button";
+	import { Spinner } from "$lib/components/ui/spinner";
 	import GenerateMenu from "$lib/components/GenerateMenu.svelte";
 	import Logo from "$lib/components/Logo.svelte";
 	import { cn } from "$lib/utils";
+	import { LIMITS } from "$lib/limits";
 
 	const isMac = isMacOS();
 
@@ -56,6 +58,7 @@
 					<input
 						class="w-[320px] rounded-xl bg-(--bg) px-2.5 py-1 text-sm font-medium text-(--text) outline-none ring-1 ring-(--text)/20"
 						bind:value={draft}
+						maxlength={LIMITS.documentTitle}
 						onblur={commitTitle}
 						onkeydown={(e) => {
 							if (e.key === "Enter") commitTitle();
@@ -85,22 +88,33 @@
 	<div class="no-drag flex items-center gap-2.5">
 		{#if store.recording}
 			<div class="flex items-center gap-2 rounded-2xl bg-red-500/10 px-3 py-1.5">
-				<span class="relative flex size-2">
-					<span class="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-60"></span>
-					<span class="relative inline-flex size-2 rounded-full bg-red-500"></span>
-				</span>
+				{#if store.stoppingRecording}
+					<Spinner class="size-3 border-red-500/30 border-t-red-500 dark:border-red-400/30 dark:border-t-red-400" />
+				{:else}
+					<span class="relative flex size-2">
+						<span class="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-60"></span>
+						<span class="relative inline-flex size-2 rounded-full bg-red-500"></span>
+					</span>
+				{/if}
 				<span class="text-xs font-medium tabular-nums text-red-600 dark:text-red-400">
-					{store.recording.state === "paused"
-						? "Paused"
-						: pluralize(store.recording.stepCount, "step")}
+					{store.stoppingRecording
+						? "Finishing…"
+						: store.recording.state === "paused"
+							? "Paused"
+							: pluralize(store.recording.stepCount, "step")}
 				</span>
 				<Button
 					size="sm"
 					variant="destructive"
 					class="ml-1 h-7"
+					disabled={store.stoppingRecording}
 					onclick={() => void store.endRecording()}
 				>
-					<Icon icon="lucide:square" class="size-3 fill-current" />
+					{#if store.stoppingRecording}
+						<Spinner class="size-3 border-white/30 border-t-white" />
+					{:else}
+						<Icon icon="lucide:square" class="size-3 fill-current" />
+					{/if}
 					Stop
 				</Button>
 			</div>

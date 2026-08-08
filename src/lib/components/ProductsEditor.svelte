@@ -6,6 +6,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Input } from "$lib/components/ui/input";
 	import VocabularyEditor from "$lib/components/VocabularyEditor.svelte";
+	import { LIMITS } from "$lib/limits";
 	import { cn } from "$lib/utils";
 
 	let {
@@ -35,6 +36,14 @@
 		const defaultProductId = store.settings.defaultProductId ?? product.id;
 		selectedId = product.id;
 		void store.updateSettings({ products, defaultProductId });
+	}
+
+	function selectProduct(id: string) {
+		if (pickOnly) {
+			selectedId = selectedId === id ? null : id;
+			return;
+		}
+		selectedId = id;
 	}
 
 	function removeProduct(id: string) {
@@ -85,7 +94,7 @@
 					<button
 						type="button"
 						class="flex w-full items-center gap-2.5 text-left"
-						onclick={() => (selectedId = product.id)}
+						onclick={() => selectProduct(product.id)}
 					>
 						<span
 							class={cn(
@@ -111,13 +120,14 @@
 								? 'bg-(--text) text-(--bg)'
 								: 'bg-(--text)/5 text-(--text)/40 hover:bg-(--text)/10'}"
 							aria-label="Select {product.name}"
-							onclick={() => (selectedId = product.id)}
+							onclick={() => selectProduct(product.id)}
 						>
 							<Icon icon="lucide:check" class="size-3.5" />
 						</button>
 					{/if}
 					<Input
 						value={product.name}
+						maxlength={LIMITS.productName}
 						placeholder="Product name"
 						oninput={(e) =>
 							updateProduct(product.id, {

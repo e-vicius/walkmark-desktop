@@ -5,6 +5,7 @@
 	import { store } from '$lib/store.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
+	import { LIMITS } from '$lib/limits';
 
 	const project = $derived(store.project!);
 	const recording = $derived(store.recording);
@@ -58,7 +59,9 @@
 
 	function commitPrereq() {
 		const value = prereqDraft.trim();
-		if (value) patchMeta({ prerequisites: [...project.prerequisites, value] });
+		if (value && project.prerequisites.length < LIMITS.prerequisitesMax) {
+			patchMeta({ prerequisites: [...project.prerequisites, value] });
+		}
 		prereqDraft = '';
 		addingPrereq = false;
 	}
@@ -88,6 +91,7 @@
 		rows={1}
 		bind:value={titleDraft}
 		placeholder="Untitled guide"
+		maxlength={LIMITS.documentTitle}
 		onfocus={() => (titleEditing = true)}
 		onblur={() => {
 			titleEditing = false;
@@ -107,6 +111,7 @@
 		rows={1}
 		bind:value={summaryDraft}
 		placeholder="Add a sentence about what this guide covers and when to use it."
+		maxlength={LIMITS.documentSummary}
 		onfocus={() => (summaryEditing = true)}
 		onblur={() => {
 			summaryEditing = false;
@@ -159,6 +164,7 @@
 				<input
 					bind:this={prereqInputRef}
 					bind:value={prereqDraft}
+					maxlength={LIMITS.prerequisite}
 					placeholder="e.g. An admin account"
 					onblur={commitPrereq}
 					onkeydown={(e) => {
@@ -175,6 +181,7 @@
 					size="sm"
 					variant="ghost"
 					class="-ml-2 mt-1.5"
+					disabled={project.prerequisites.length >= LIMITS.prerequisitesMax}
 					onclick={() => (addingPrereq = true)}
 				>
 					<Icon icon="lucide:plus" class="size-3.5" />

@@ -221,7 +221,7 @@ pub async fn pull_with(
     mut report: impl FnMut(PullProgress),
 ) -> Result<()> {
     let endpoint = normalize(endpoint);
-    let model = model.trim().to_string();
+    let model = crate::limits::clamp_trim(model, crate::limits::MODEL_ID);
     if model.is_empty() {
         return Err(AppError::Invalid("No model name was given.".into()));
     }

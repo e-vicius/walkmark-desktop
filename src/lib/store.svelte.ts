@@ -49,15 +49,26 @@ const DEFAULT_SETTINGS: Settings = {
 class AppStore {
   ready = $state(false);
   settings = $state<Settings>({ ...DEFAULT_SETTINGS });
-  permission = $state<PermissionStatus>({ granted: true, required: false });
+  permission = $state<PermissionStatus>({
+    granted: true,
+    required: false,
+    inputGranted: true,
+    inputRequired: false,
+  });
   catalog = $state<ProviderCatalog>({ providers: [], configured: [] });
   local = $state<LocalOverview | null>(null);
   pull = $state<PullProgress | null>(null);
   projects = $state<ProjectSummary[]>([]);
+  projectsLoading = $state(false);
+  projectLoading = $state(false);
   project = $state<Project | null>(null);
   selection = $state<string[]>([]);
   focused = $state<string | null>(null);
   recording = $state<RecordingTick | null>(null);
+  /** True while stop_recording is in flight (main window). */
+  stoppingRecording = $state(false);
+  /** Set while the main window initiated stop so we don't finalize twice. */
+  finalizingFromMainStop = false;
   generation = $state<GenerationProgress | null>(null);
   route = $state<Route>("library");
   dialog = $state<DialogName>(null);
@@ -65,6 +76,9 @@ class AppStore {
   settingsTab = $state("model");
   /** Return here after closing settings, when opened from another dialog. */
   dialogReturn = $state<DialogName | null>(null);
+  /** Provider/model picked for the next Write run — may differ from Settings. */
+  writeProvider = $state<ProviderId>("gemini");
+  writeModel = $state("");
 
   get activeProvider(): ProviderInfo | undefined {
     return this.catalog.providers.find((p) => p.id === this.settings.provider);
@@ -80,24 +94,111 @@ class AppStore {
   }
 
   get canWrite(): boolean {
-    const info = this.activeProvider;
-    if (!info) return true;
-    if (info.needsKey) return this.catalog.configured.includes(info.id);
+    return this.canWriteWith(this.settings.provider);
+  }
+
+  canWriteWith(providerId: ProviderId): boolean {
+    const info = this.catalog.providers.find((p) => p.id === providerId);
+    if (!info) return false;
+    if (info.needsKey) return this.catalog.configured.includes(providerId);
     if (info.local && this.local) {
       return this.local.running && this.local.models.some((m) => m.vision);
     }
     return true;
   }
 
+  get writeOptions(): { provider: ProviderId; model: string; label: string; group: string }[] {
+    const options: { provider: ProviderId; model: string; label: string; group: string }[] = [];
+
+    for (const provider of this.catalog.providers) {
+      if (!this.canWriteWith(provider.id)) continue;
+
+      if (provider.local) {
+        for (const model of this.local?.models.filter((m) => m.vision) ?? []) {
+          options.push({
+            provider: provider.id,
+            model: model.id,
+            label: model.id,
+            group: provider.name,
+          });
+        }
+        continue;
+      }
+
+      const saved = this.settings.providers[provider.id]?.model?.trim();
+      const suggested = provider.models.map((m) => m.id);
+      const models = saved && !suggested.includes(saved) ? [...suggested, saved] : suggested;
+      const ids = models.length > 0 ? models : [provider.defaultModel].filter(Boolean);
+
+      for (const model of ids) {
+        const entry = provider.models.find((m) => m.id === model);
+        if (entry?.vision === false) continue;
+        if (
+          !entry &&
+          provider.id === "mistral" &&
+          !/(pixtral|ministral|mistral-small|mistral-large|mistral-medium|devstral)/i.test(model)
+        ) {
+          continue;
+        }
+        options.push({
+          provider: provider.id,
+          model,
+          label: entry?.name ?? model,
+          group: provider.name,
+        });
+      }
+    }
+
+    return options;
+  }
+
+  get writeSelectionLabel(): string {
+    const option = this.writeOptions.find(
+      (o) => o.provider === this.writeProvider && o.model === this.writeModel,
+    );
+    if (option) return `${option.group} · ${option.label}`;
+    const provider = this.catalog.providers.find((p) => p.id === this.writeProvider);
+    if (provider && this.writeModel) return `${provider.name} · ${this.writeModel}`;
+    return "Select model";
+  }
+
+  syncWriteSelection() {
+    const fallback = this.writeOptions[0];
+    if (!fallback) {
+      this.writeProvider = this.settings.provider;
+      const info = this.activeProvider;
+      this.writeModel =
+        this.settings.providers[this.settings.provider]?.model?.trim() ||
+        info?.defaultModel ||
+        "";
+      return;
+    }
+
+    const current = this.writeOptions.find(
+      (o) => o.provider === this.writeProvider && o.model === this.writeModel,
+    );
+    if (!current) {
+      const preferred = this.writeOptions.find((o) => o.provider === this.settings.provider);
+      const pick = preferred ?? fallback;
+      this.writeProvider = pick.provider;
+      this.writeModel = pick.model;
+    }
+  }
+
+  selectWriteModel(provider: ProviderId, model: string) {
+    this.writeProvider = provider;
+    this.writeModel = model;
+  }
+
   get blockedReason(): string | null {
     if (this.canWrite) return null;
     const info = this.activeProvider;
     if (!info) return null;
-    if (info.needsKey) return `Add your ${info.name} API key to start writing.`;
+    if (info.needsKey) return "Choose a provider and add your API key in Settings.";
     if (!this.local?.running) {
-      return "Ollama isn't running, so local models can't be used yet.";
+      return "Start Ollama or switch to a cloud provider in Settings.";
     }
-    return "No local model that can read screenshots is downloaded yet.";
+    return "Download a vision-capable model in Settings.";
   }
 
   async boot() {
@@ -130,6 +231,7 @@ class AppStore {
         : null;
       this.dialog = settings.onboarded ? null : "onboarding";
       this.ready = true;
+      this.syncWriteSelection();
       this.applyTheme();
     } catch (error) {
       this.ready = true;
@@ -202,6 +304,7 @@ class AppStore {
     try {
       this.settings = await api.saveSettings(next);
       this.applyTheme();
+      this.syncWriteSelection();
     } catch (error) {
       this.reportError(error, "Your settings could not be saved");
     }
@@ -218,6 +321,7 @@ class AppStore {
 
   async refreshCredentials() {
     this.catalog = await api.providerCatalog();
+    this.syncWriteSelection();
   }
 
   async refreshLocal() {
@@ -227,6 +331,7 @@ class AppStore {
       if (!local.downloading && this.pull?.done !== false) {
         this.pull = null;
       }
+      this.syncWriteSelection();
     } catch (error) {
       this.reportError(error, "Could not check for local models");
     }
@@ -270,22 +375,29 @@ class AppStore {
   }
 
   async refreshProjects() {
+    this.projectsLoading = true;
     try {
       this.projects = await api.listProjects();
     } catch (error) {
       this.reportError(error);
+    } finally {
+      this.projectsLoading = false;
     }
   }
 
   async openProject(id: string) {
+    this.projectLoading = true;
+    this.route = "editor";
     try {
       const project = await api.openProject(id);
       this.project = project;
-      this.route = "editor";
       this.focused = project.steps[0]?.id ?? null;
       this.selection = [];
     } catch (error) {
+      this.route = "library";
       this.reportError(error, "That document could not be opened");
+    } finally {
+      this.projectLoading = false;
     }
   }
 
@@ -327,10 +439,10 @@ class AppStore {
     }
   }
 
-  async beginRecording(sourceId: string, productId: string) {
+  async beginRecording(sourceId: string, productId?: string | null) {
     try {
       const project = await api.startRecording(sourceId, productId);
-      void this.updateSettings({ defaultProductId: productId });
+      if (productId) void this.updateSettings({ defaultProductId: productId });
       this.project = project;
       this.route = "editor";
       this.dialog = null;
@@ -371,37 +483,50 @@ class AppStore {
   }
 
   async endRecording() {
+    if (this.stoppingRecording) return;
+    this.stoppingRecording = true;
+    this.finalizingFromMainStop = true;
     try {
       const project = await api.stopRecording();
-      this.project = project;
-      this.recording = null;
-      this.route = "editor";
-      this.focused = project.steps[0]?.id ?? null;
-      await this.refreshProjects();
-
-      if (project.steps.length === 0) {
-        this.notify({
-          tone: "info",
-          title: "No steps were captured",
-          detail:
-            "Nothing on screen changed enough to register. Try raising the sensitivity, or press the mark button while recording.",
-        });
-        return;
-      }
-      if (this.canWrite) {
-        this.notify({
-          tone: "success",
-          title: `Captured ${project.steps.length} steps`,
-          detail: "Review the screenshots, then have the instructions written.",
-          action: {
-            label: "Write now",
-            run: () => void this.runGeneration("missing"),
-          },
-        });
-      }
+      this.finalizeRecording(project);
     } catch (error) {
       this.recording = null;
+      this.stoppingRecording = false;
       this.reportError(error, "The recording could not be finished");
+    } finally {
+      this.finalizingFromMainStop = false;
+      this.stoppingRecording = false;
+    }
+  }
+
+  finalizeRecording(project: Project) {
+    this.project = project;
+    this.recording = null;
+    this.stoppingRecording = false;
+    this.route = "editor";
+    this.focused = project.steps[0]?.id ?? null;
+    void this.refreshProjects();
+    this.syncWriteSelection();
+
+    if (project.steps.length === 0) {
+      this.notify({
+        tone: "info",
+        title: "No steps were captured",
+        detail:
+          "No clicks, typing, or scrolling were detected. Try interacting with the app you are documenting, or press the mark button to capture manually.",
+      });
+      return;
+    }
+    if (this.canWriteWith(this.writeProvider) && this.writeModel.trim()) {
+      this.notify({
+        tone: "success",
+        title: `Captured ${project.steps.length} steps`,
+        detail: "Review the screenshots, then have the instructions written.",
+        action: {
+          label: "Write now",
+          run: () => void this.runGeneration("missing"),
+        },
+      });
     }
   }
 
@@ -506,15 +631,26 @@ class AppStore {
   }
 
   async runGeneration(scope: api.GenerateScope, ids: string[] = []) {
-    const reason = this.blockedReason;
-    if (reason) {
-      this.dialog = "settings";
-      this.notify({ tone: "info", title: "Finish setting up a model", detail: reason });
+    if (!this.canWriteWith(this.writeProvider)) {
+      this.openSettings("model");
+      this.notify({
+        tone: "info",
+        title: "Select an AI model",
+        detail: "Add a key or install a local model before writing.",
+      });
+      return;
+    }
+    if (!this.writeModel.trim()) {
+      this.openSettings("model");
+      this.notify({ tone: "info", title: "Select an AI model", detail: "Pick a model to write with." });
       return;
     }
     try {
       this.generation = { done: 0, total: 0, running: true };
-      await api.generate(scope, ids);
+      await api.generate(scope, ids, {
+        provider: this.writeProvider,
+        model: this.writeModel,
+      });
     } catch (error) {
       this.generation = null;
       this.reportError(error, "Writing could not start");

@@ -189,6 +189,35 @@ fn openai_sends_a_bearer_token_and_reads_the_choice_back() {
 }
 
 #[test]
+fn mistral_uses_object_image_urls_without_structured_modes() {
+    let stub = Stub::new(1, |_, stream| {
+        reply(
+            stream,
+            200,
+            r#"{"choices":[{"message":{"content":"{\"title\":\"Save it\",\"body\":\"Click Save.\"}"}}]}"#,
+        )
+    });
+
+    let client = provider::Client::new(
+        Provider::Mistral,
+        "mistral-small-latest".into(),
+        stub.base.clone(),
+        "mistral-test".into(),
+    )
+    .unwrap();
+
+    let step = block_on(client.describe("be helpful", "what now", image())).unwrap();
+    assert_eq!(step.title, "Save it");
+
+    let request = &stub.requests()[0];
+    assert_eq!(request.header("authorization"), Some("Bearer mistral-test"));
+    assert_eq!(request.path, "/v1/chat/completions");
+    assert!(request.body.get("response_format").is_none());
+    assert!(request.body.get("tools").is_none());
+    assert!(request.body["messages"][1]["content"][1]["image_url"].is_string());
+}
+
+#[test]
 fn anthropic_sends_its_version_header_and_reads_the_forced_tool_call() {
     let stub = Stub::new(1, |_, stream| {
         reply(

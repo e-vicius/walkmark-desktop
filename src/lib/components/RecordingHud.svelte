@@ -5,19 +5,22 @@
 	import * as api from '$lib/api';
 	import { duration, pluralize, shortcutSymbols } from '$lib/format';
 	import { store } from '$lib/store.svelte';
-	import { cn } from '$lib/utils';
+	import { Spinner } from '$lib/components/ui/spinner';
 
 	let busy = $state(false);
+	let stopping = $state(false);
 
 	const recording = $derived(store.recording);
 	const paused = $derived(recording?.state === 'paused');
 	const counting = $derived(recording?.state === 'counting');
+	const finishing = $derived(stopping || recording?.state === 'stopping');
 
 	onMount(() => {
 		void getCurrentWindow().setAlwaysOnTop(true);
 	});
 
 	async function run(action: () => Promise<unknown>) {
+		if (busy || finishing) return;
 		busy = true;
 		try {
 			await action();
@@ -28,12 +31,15 @@
 		}
 	}
 
-	function activityBars(value: number, muted: boolean) {
-		const bars = 5;
-		return muted ? 0 : Math.min(bars, Math.round(value * 22) + (value > 0.002 ? 1 : 0));
+	async function stop() {
+		if (busy || finishing || counting) return;
+		stopping = true;
+		try {
+			await api.stopRecording();
+		} catch {
+			stopping = false;
+		}
 	}
-
-	const activeBars = $derived(activityBars(recording?.activity ?? 0, paused || counting));
 </script>
 
 <style>
@@ -56,51 +62,44 @@
 	}
 </style>
 
-<div class="flex h-full w-full items-center justify-center bg-transparent p-1.5">
+<div class="flex h-full w-full items-center justify-center p-1.5">
 	<div
-		data-tauri-drag-region
-		class="flex h-full w-full items-center gap-3 rounded-3xl border border-white/10 bg-[#15161c]/95 px-3.5 shadow-[0_10px_40px_-8px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+		class="flex h-full w-full items-center gap-3 rounded-3xl border border-white/10 bg-[#15161c]/95 px-3.5 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.45)] backdrop-blur-xl"
 	>
-		<div class="pointer-events-none flex items-center gap-2.5">
+		<div
+			data-tauri-drag-region
+			class="flex min-w-0 flex-1 items-center gap-2.5"
+		>
 			<span class="relative flex size-2.5 flex-none">
-				{#if !paused}
+				{#if finishing}
+					<Spinner class="size-2.5 border-white/20 border-t-white" />
+				{:else if !paused}
 					<span class="pulse-ring absolute inline-flex size-full rounded-full bg-[#f2555a]"></span>
+					<span class="relative inline-flex size-2.5 rounded-full bg-[#f2555a]"></span>
+				{:else}
+					<span class="relative inline-flex size-2.5 rounded-full bg-[#9a9cab]"></span>
 				{/if}
-				<span
-					class={cn(
-						'relative inline-flex size-2.5 rounded-full',
-						paused ? 'bg-[#9a9cab]' : 'bg-[#f2555a]'
-					)}
-				></span>
 			</span>
-			<div class="leading-none">
+			<div class="min-w-0 leading-none">
 				<div class="font-mono text-[15px] font-medium tabular-nums text-white">
-					{counting
-						? `Starting in ${recording?.countdown ?? 0}`
-						: duration(recording?.elapsedMs ?? 0)}
+					{finishing
+						? 'Finishing…'
+						: counting
+							? `Starting in ${recording?.countdown ?? 0}`
+							: duration(recording?.elapsedMs ?? 0)}
 				</div>
-				<div class="mt-1 text-[11px] text-white/50">
-					{pluralize(recording?.stepCount ?? 0, 'step')} captured
+				<div class="mt-1 truncate text-[11px] text-white/50">
+					{finishing
+						? 'Saving captured steps'
+						: pluralize(recording?.stepCount ?? 0, 'step') + ' captured'}
 				</div>
 			</div>
 		</div>
 
-		<div class="pointer-events-none flex h-6 items-end gap-[3px]" aria-label="Screen activity">
-			{#each Array.from({ length: 5 }) as _, i (i)}
-				<span
-					class={cn(
-						'w-[3px] rounded-full transition-all duration-200',
-						i < activeBars ? 'bg-[#6366f1]' : 'bg-white/12'
-					)}
-					style="height: {8 + i * 3}px"
-				></span>
-			{/each}
-		</div>
-
-		<div class="ml-auto flex items-center gap-1.5">
+		<div class="no-drag flex shrink-0 items-center gap-1.5">
 			<button
 				type="button"
-				disabled={busy || counting}
+				disabled={busy || finishing || counting}
 				title="Capture this moment · {shortcutSymbols(['shift', 'alt', 'M'])}"
 				aria-label="Capture this moment ({shortcutSymbols(['shift', 'alt', 'M'])})"
 				onclick={() => void run(api.markStep)}
@@ -111,7 +110,7 @@
 
 			<button
 				type="button"
-				disabled={busy || counting}
+				disabled={busy || finishing || counting}
 				title="{paused ? 'Resume' : 'Pause'} · {shortcutSymbols(['shift', 'alt', 'P'])}"
 				aria-label="{paused ? 'Resume' : 'Pause'} ({shortcutSymbols(['shift', 'alt', 'P'])})"
 				onclick={() => void run(() => api.pauseRecording(!paused))}
@@ -122,13 +121,17 @@
 
 			<button
 				type="button"
-				disabled={busy}
+				disabled={busy || finishing}
 				title="Finish recording · {shortcutSymbols(['shift', 'alt', 'S'])}"
 				aria-label="Finish recording ({shortcutSymbols(['shift', 'alt', 'S'])})"
-				onclick={() => void run(api.stopRecording)}
+				onclick={() => void stop()}
 				class="grid size-9 place-items-center rounded-xl bg-[#f2555a] text-white transition-all duration-150 hover:brightness-110 active:scale-95 disabled:opacity-35"
 			>
-				<Icon icon="lucide:square" class="size-3.5 fill-current" />
+				{#if finishing}
+					<Spinner class="size-4 border-white/30 border-t-white" />
+				{:else}
+					<Icon icon="lucide:square" class="size-3.5 fill-current" />
+				{/if}
 			</button>
 		</div>
 	</div>

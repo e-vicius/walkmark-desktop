@@ -26,13 +26,8 @@ export function resolveProduct(
   settings: Settings,
   productId?: string | null,
 ): Product | undefined {
-  if (productId) {
-    return settings.products.find((p) => p.id === productId);
-  }
-  if (settings.defaultProductId) {
-    return settings.products.find((p) => p.id === settings.defaultProductId);
-  }
-  return settings.products[0];
+  if (!productId) return undefined;
+  return settings.products.find((p) => p.id === productId);
 }
 
 export function productLabel(settings: Settings, productId?: string | null): string {

@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 
 use tauri::{AppHandle, Manager};
 
@@ -253,41 +255,72 @@ pub fn prune_frames(app: &AppHandle, project: &Project) -> Result<()> {
 // API keys
 // ---------------------------------------------------------------------------
 //
-// One credential per provider, so switching between them doesn't mean pasting a
-// key back in every time.
+// Keys live in an owner-only file under the app data directory. macOS Keychain
+// is consulted once to migrate older installs, then keys are copied to disk so
+// dev rebuilds (which change the app signature) do not prompt every launch.
+// An in-memory cache avoids repeated disk reads during a session.
+
+static KEY_CACHE: OnceLock<Mutex<HashMap<Provider, String>>> = OnceLock::new();
+
+fn key_cache() -> &'static Mutex<HashMap<Provider, String>> {
+    KEY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+/// Load every stored key into memory. Call once during startup.
+pub fn warm_api_key_cache(app: &AppHandle) {
+    let mut cache = key_cache().lock().expect("api key cache");
+    cache.clear();
+    for provider in Provider::ALL {
+        if !provider.needs_key() {
+            continue;
+        }
+        if let Some(key) = read_key(app, provider) {
+            cache.insert(provider, key);
+        }
+    }
+}
 
 /// Prefer the OS keychain. Some Linux desktops ship without a Secret Service
 /// provider, so fall back to an owner-only file rather than losing the feature.
 pub fn set_api_key(app: &AppHandle, provider: Provider, key: &str) -> Result<()> {
-    let key = key.trim();
+    let key = crate::limits::clamp_trim(key, crate::limits::API_KEY);
     if key.is_empty() {
         return clear_api_key(app, provider);
     }
-    match keyring::Entry::new(KEYRING_SERVICE, provider.id()) {
-        Ok(entry) if entry.set_password(key).is_ok() => {
-            let _ = fs::remove_file(fallback_key_path(app, provider)?);
-            Ok(())
-        }
-        _ => write_fallback_key(app, provider, key),
+    write_fallback_key(app, provider, &key)?;
+    key_cache()
+        .lock()
+        .expect("api key cache")
+        .insert(provider, key.clone());
+    // Best-effort keychain mirror for installs that already rely on it.
+    if let Ok(entry) = keyring::Entry::new(KEYRING_SERVICE, provider.id()) {
+        let _ = entry.set_password(&key);
     }
+    Ok(())
 }
 
 pub fn get_api_key(app: &AppHandle, provider: Provider) -> Option<String> {
-    if let Ok(entry) = keyring::Entry::new(KEYRING_SERVICE, provider.id()) {
-        if let Ok(secret) = entry.get_password() {
-            if !secret.is_empty() {
-                return Some(secret);
-            }
-        }
+    if let Some(key) = key_cache()
+        .lock()
+        .expect("api key cache")
+        .get(&provider)
+        .cloned()
+    {
+        return Some(key);
     }
-    fallback_key_path(app, provider)
-        .ok()
-        .and_then(|p| fs::read_to_string(p).ok())
-        .map(|s| s.trim().to_owned())
-        .filter(|s| !s.is_empty())
+    let key = read_key(app, provider)?;
+    key_cache()
+        .lock()
+        .expect("api key cache")
+        .insert(provider, key.clone());
+    Some(key)
 }
 
 pub fn clear_api_key(app: &AppHandle, provider: Provider) -> Result<()> {
+    key_cache()
+        .lock()
+        .expect("api key cache")
+        .remove(&provider);
     if let Ok(entry) = keyring::Entry::new(KEYRING_SERVICE, provider.id()) {
         let _ = entry.delete_credential();
     }
@@ -301,6 +334,30 @@ pub fn providers_with_keys(app: &AppHandle) -> Vec<Provider> {
         .into_iter()
         .filter(|p| p.needs_key() && get_api_key(app, *p).is_some())
         .collect()
+}
+
+fn read_key(app: &AppHandle, provider: Provider) -> Option<String> {
+    if let Ok(path) = fallback_key_path(app, provider) {
+        if let Ok(secret) = fs::read_to_string(&path) {
+            let secret = secret.trim().to_string();
+            if !secret.is_empty() {
+                return Some(secret);
+            }
+        }
+    }
+
+    if let Ok(entry) = keyring::Entry::new(KEYRING_SERVICE, provider.id()) {
+        if let Ok(secret) = entry.get_password() {
+            let secret = secret.trim().to_string();
+            if !secret.is_empty() {
+                // Copy into the file store so the next launch skips Keychain.
+                let _ = write_fallback_key(app, provider, &secret);
+                return Some(secret);
+            }
+        }
+    }
+
+    None
 }
 
 fn fallback_key_path(app: &AppHandle, provider: Provider) -> Result<PathBuf> {
@@ -411,7 +468,7 @@ mod tests {
         }));
 
         assert_eq!(settings.provider, Provider::Gemini);
-        assert_eq!(settings.active().model, "gemini-3.5-flash-lite");
+        assert_eq!(settings.config_for(settings.provider).model, "gemini-3.5-flash-lite");
         assert!(settings.onboarded);
         assert_eq!(settings.concurrency, 3);
     }
@@ -432,7 +489,7 @@ mod tests {
             "onboarded": true
         }));
 
-        assert_eq!(settings.active().model, "gemini-3.5-flash-lite");
+        assert_eq!(settings.config_for(settings.provider).model, "gemini-3.5-flash-lite");
     }
 
     #[test]
@@ -453,13 +510,13 @@ mod tests {
         }));
 
         assert_eq!(settings.provider, Provider::Ollama);
-        assert_eq!(settings.active().model, "qwen3-vl:8b");
+        assert_eq!(settings.config_for(settings.provider).model, "qwen3-vl:8b");
     }
 
     #[test]
     fn an_unconfigured_provider_falls_back_to_the_catalog_default() {
         let settings = Settings::default();
-        assert_eq!(settings.active().model, "gemini-3.6-flash");
+        assert_eq!(settings.config_for(settings.provider).model, "gemini-3.6-flash");
         assert_eq!(
             settings.config_for(Provider::Anthropic).model,
             "claude-sonnet-5"
@@ -484,7 +541,7 @@ mod tests {
             .into(),
             ..Default::default()
         };
-        let active = settings.active();
+        let active = settings.config_for(settings.provider);
         assert_eq!(active.model, "local/llava");
         // The trailing slash would otherwise produce a double slash in URLs.
         assert_eq!(active.base_url, "http://localhost:1234/v1");

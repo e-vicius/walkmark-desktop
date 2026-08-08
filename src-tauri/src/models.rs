@@ -79,6 +79,15 @@ impl Rect {
     }
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum AnnotationStroke {
+    #[default]
+    Medium,
+    Thin,
+    Thick,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Annotation {
@@ -86,6 +95,11 @@ pub struct Annotation {
     pub id: String,
     pub kind: AnnotationKind,
     pub rect: Rect,
+    /// `#rrggbb` — highlight outline and redact fill.
+    #[serde(default)]
+    pub color: Option<String>,
+    #[serde(default)]
+    pub stroke: Option<AnnotationStroke>,
 }
 
 // ---------------------------------------------------------------------------
@@ -169,16 +183,6 @@ pub struct VocabularyTerm {
     pub term: String,
     #[serde(default)]
     pub explanation: String,
-}
-
-impl VocabularyTerm {
-    pub fn new() -> Self {
-        Self {
-            id: new_id(),
-            term: String::new(),
-            explanation: String::new(),
-        }
-    }
 }
 
 fn parse_vocabulary_string(raw: &str) -> Vec<VocabularyTerm> {
@@ -365,12 +369,22 @@ pub struct CaptureSettings {
     /// How often we grab a frame while recording.
     pub sample_interval_ms: u64,
     /// 0 = only huge changes become steps, 1 = almost every change does.
+    /// Used only when [`Self::visual_fallback`] is enabled.
     pub sensitivity: f32,
     /// Never emit two steps closer together than this.
     pub min_gap_ms: u64,
     /// Wait for the screen to stop changing before committing a step, so we
     /// don't capture half-open menus or mid-flight animations.
+    /// Used only when [`Self::visual_fallback`] is enabled.
     pub settle: bool,
+    /// Fall back to visual change detection when input monitoring is unavailable
+    /// or as a supplement to catch transitions input misses.
+    #[serde(default)]
+    pub visual_fallback: bool,
+    /// After a click, key press or scroll, wait this long before taking the
+    /// screenshot so menus and typed text have time to appear.
+    #[serde(default = "default_input_settle_ms")]
+    pub input_settle_ms: u64,
     /// Longest edge of stored frames. Keeps retina captures from ballooning.
     pub max_width: u32,
     pub countdown_secs: u32,
@@ -378,13 +392,19 @@ pub struct CaptureSettings {
     pub hide_window: bool,
 }
 
+fn default_input_settle_ms() -> u64 {
+    300
+}
+
 impl Default for CaptureSettings {
     fn default() -> Self {
         Self {
-            sample_interval_ms: 600,
+            sample_interval_ms: 200,
             sensitivity: 0.55,
-            min_gap_ms: 1200,
+            min_gap_ms: 800,
             settle: true,
+            visual_fallback: false,
+            input_settle_ms: 300,
             max_width: 1800,
             countdown_secs: 3,
             hide_window: true,
@@ -405,6 +425,8 @@ pub enum Provider {
     OpenAi,
     #[serde(rename = "anthropic")]
     Anthropic,
+    #[serde(rename = "mistral")]
+    Mistral,
     /// One API key, many cloud models through openrouter.ai.
     #[serde(rename = "openrouter")]
     OpenRouter,
@@ -418,10 +440,11 @@ pub enum Provider {
 }
 
 impl Provider {
-    pub const ALL: [Provider; 6] = [
+    pub const ALL: [Provider; 7] = [
         Provider::Gemini,
         Provider::OpenAi,
         Provider::Anthropic,
+        Provider::Mistral,
         Provider::OpenRouter,
         Provider::Ollama,
         Provider::Compatible,
@@ -432,6 +455,7 @@ impl Provider {
             Provider::Gemini => "gemini",
             Provider::OpenAi => "openai",
             Provider::Anthropic => "anthropic",
+            Provider::Mistral => "mistral",
             Provider::OpenRouter => "openrouter",
             Provider::Ollama => "ollama",
             Provider::Compatible => "compatible",
@@ -448,6 +472,7 @@ impl Provider {
             Provider::Gemini => "Gemini",
             Provider::OpenAi => "OpenAI",
             Provider::Anthropic => "Claude",
+            Provider::Mistral => "Mistral",
             Provider::OpenRouter => "OpenRouter",
             Provider::Ollama => "Ollama",
             Provider::Compatible => "The server",
@@ -469,6 +494,7 @@ impl Provider {
             Provider::Gemini => "https://generativelanguage.googleapis.com/v1beta",
             Provider::OpenAi => "https://api.openai.com/v1",
             Provider::Anthropic => "https://api.anthropic.com/v1",
+            Provider::Mistral => "https://api.mistral.ai/v1",
             Provider::OpenRouter => "https://openrouter.ai/api/v1",
             Provider::Ollama => "http://127.0.0.1:11434",
             Provider::Compatible => "",
@@ -542,6 +568,28 @@ impl Default for Settings {
 
 impl Settings {
     /// Guarantee a usable product list after loading older settings files.
+    pub fn clamp_text(&mut self) {
+        self.audience = crate::limits::clamp(&self.audience, crate::limits::AUDIENCE);
+        self.language = crate::limits::clamp(&self.language, crate::limits::LANGUAGE);
+        for product in &mut self.products {
+            product.name =
+                crate::limits::clamp(&product.name, crate::limits::PRODUCT_NAME);
+            for term in &mut product.vocabulary {
+                term.term =
+                    crate::limits::clamp(&term.term, crate::limits::VOCABULARY_TERM);
+                term.explanation = crate::limits::clamp(
+                    &term.explanation,
+                    crate::limits::VOCABULARY_EXPLANATION,
+                );
+            }
+        }
+        for config in self.providers.values_mut() {
+            config.model = crate::limits::clamp(&config.model, crate::limits::MODEL_ID);
+            config.base_url =
+                crate::limits::clamp(&config.base_url, crate::limits::BASE_URL);
+        }
+    }
+
     pub fn normalize_products(&mut self) {
         if self.products.is_empty() {
             let general = Product::new("General");
@@ -551,6 +599,7 @@ impl Settings {
         for product in &mut self.products {
             product.normalize_vocabulary();
         }
+        self.clamp_text();
         if self.default_product_id.is_none()
             || self
                 .default_product_id
@@ -567,18 +616,6 @@ impl Settings {
 
     pub fn resolve_product(&self, id: Option<&str>) -> Option<&Product> {
         id.and_then(|id| self.product(id))
-            .or_else(|| {
-                self.default_product_id
-                    .as_deref()
-                    .and_then(|id| self.product(id))
-            })
-            .or_else(|| self.products.first())
-    }
-
-    /// Resolved config for the active provider, with blanks filled in from the
-    /// catalog. Every caller wants this rather than the raw map.
-    pub fn active(&self) -> ProviderConfig {
-        self.config_for(self.provider)
     }
 
     pub fn config_for(&self, provider: Provider) -> ProviderConfig {
@@ -609,6 +646,7 @@ pub enum RecordingState {
     Counting,
     Recording,
     Paused,
+    Stopping,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -617,7 +655,7 @@ pub struct RecordingTick {
     pub state: RecordingState,
     pub elapsed_ms: u64,
     pub step_count: usize,
-    /// 0..1 measure of how much the screen just changed, drives the HUD meter.
+    /// 0..1 measure of how much the screen just changed.
     pub activity: f32,
     pub countdown: u32,
 }
