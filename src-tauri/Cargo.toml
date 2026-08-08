@@ -45,7 +45,12 @@ keyring = "4"
 rayon = "1"
 dirs = "6"
 pulldown-cmark = "0.13"
+
+[target.'cfg(any(target_os = "macos", target_os = "windows"))'.dependencies]
 rdev = { git = "https://github.com/Narsil/rdev.git", rev = "c77b4e5456301cfa7f2226020f2a58f2f8d77c5d" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+rdev = { git = "https://github.com/Narsil/rdev.git", rev = "c77b4e5456301cfa7f2226020f2a58f2f8d77c5d", features = ["x11"] }
 
 # Only for reading total physical memory, so the local-model list can say what
 # this machine can actually run.

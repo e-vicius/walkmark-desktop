@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement or new capability
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to do that Steppy makes hard today?
+      placeholder: I need to …
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like it to work?
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Area
+      options:
+        - label: Recording / capture
+        - label: Editor
+        - label: AI writing
+        - label: Export
+        - label: Local models
+        - label: Docs / website
