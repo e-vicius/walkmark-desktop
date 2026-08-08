@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Steppy export formats capture</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+			}
+
+			body {
+				width: 1280px;
+				height: 720px;
+				background: #f0f0f2;
+				font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.window {
+				position: relative;
+				width: 1280px;
+				height: 720px;
+				padding: 44px 48px;
+				overflow: hidden;
+			}
+
+			.panel {
+				position: absolute;
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 16px;
+				background: #fff;
+				box-shadow: 0 12px 40px rgb(13 13 13 / 0.08);
+			}
+
+			.panel-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				height: 36px;
+				padding: 0 14px;
+				border-bottom: 1px solid rgb(13 13 13 / 0.06);
+				font-size: 11.5px;
+				font-weight: 500;
+				color: rgb(13 13 13 / 0.48);
+			}
+
+			.panel-head strong {
+				font-weight: 600;
+				color: rgb(13 13 13 / 0.72);
+			}
+
+			/* Markdown */
+			.md {
+				left: 48px;
+				top: 44px;
+				width: 548px;
+				height: 632px;
+				background: #1c1c1e;
+				color: #d4d4d4;
+				z-index: 1;
+			}
+
+			.md .panel-head {
+				border-bottom-color: #2d2d2d;
+				background: #252528;
+				color: #8b8b8b;
+			}
+
+			.md .panel-head strong {
+				color: #d4d4d4;
+			}
+
+			.md-body {
+				display: flex;
+				height: calc(100% - 36px);
+			}
+
+			.md-tree {
+				width: 136px;
+				flex-shrink: 0;
+				padding: 12px 10px;
+				border-right: 1px solid #2d2d2d;
+				font-size: 10.5px;
+				line-height: 1.55;
+				color: #7a7a7a;
+			}
+
+			.md-tree .folder {
+				margin-bottom: 2px;
+				color: #c5c5c5;
+				font-weight: 500;
+			}
+
+			.md-tree .file {
+				padding: 2px 6px;
+				border-radius: 4px;
+			}
+
+			.md-tree .file.nested {
+				padding-left: 18px;
+			}
+
+			.md-tree .file.active {
+				color: #fff;
+				background: rgb(255 255 255 / 0.08);
+			}
+
+			.md-editor {
+				flex: 1;
+				padding: 16px 18px;
+				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+				font-size: 11px;
+				line-height: 1.7;
+			}
+
+			.md-editor .h1 { color: #569cd6; }
+			.md-editor .h2 { color: #569cd6; }
+			.md-editor .bold { color: #dcdcaa; font-weight: 600; }
+			.md-editor .muted { color: #6a6a6a; }
+			.md-editor .link { color: #ce9178; }
+
+			/* PDF */
+			.pdf {
+				left: 468px;
+				top: 268px;
+				width: 328px;
+				height: 408px;
+				z-index: 2;
+			}
+
+			.pdf-body {
+				padding: 22px 24px 52px;
+			}
+
+			.pdf h1 {
+				font-size: 16px;
+				font-weight: 700;
+				line-height: 1.25;
+				letter-spacing: -0.02em;
+			}
+
+			.pdf .lede {
+				margin-top: 8px;
+				font-size: 10.5px;
+				line-height: 1.5;
+				color: rgb(13 13 13 / 0.56);
+			}
+
+			.pdf-step {
+				margin-top: 16px;
+				padding-top: 14px;
+				border-top: 1px solid rgb(13 13 13 / 0.08);
+			}
+
+			.pdf-step-head {
+				display: flex;
+				gap: 8px;
+				align-items: baseline;
+				font-size: 11.5px;
+				font-weight: 600;
+			}
+
+			.pdf-step-head span {
+				font-size: 10px;
+				font-weight: 700;
+				color: rgb(13 13 13 / 0.36);
+			}
+
+			.pdf-step p {
+				margin-top: 6px;
+				font-size: 10px;
+				line-height: 1.5;
+				color: rgb(13 13 13 / 0.64);
+			}
+
+			.pdf-step img {
+				display: block;
+				width: 100%;
+				height: 108px;
+				margin-top: 10px;
+				object-fit: cover;
+				object-position: top;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 8px;
+			}
+
+			.pdf-foot {
+				position: absolute;
+				left: 24px;
+				right: 24px;
+				bottom: 16px;
+				display: flex;
+				justify-content: space-between;
+				padding-top: 10px;
+				border-top: 1px solid rgb(13 13 13 / 0.08);
+				font-size: 9px;
+				color: rgb(13 13 13 / 0.36);
+			}
+
+			/* HTML */
+			.html {
+				right: 48px;
+				top: 44px;
+				width: 448px;
+				height: 292px;
+				z-index: 3;
+			}
+
+			.html-bar {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				height: 36px;
+				padding: 0 14px;
+				border-bottom: 1px solid rgb(13 13 13 / 0.06);
+				background: #fafafa;
+				font-size: 11.5px;
+				color: rgb(13 13 13 / 0.48);
+			}
+
+			.dots {
+				display: flex;
+				gap: 5px;
+			}
+
+			.dots span {
+				width: 8px;
+				height: 8px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.1);
+			}
+
+			.html-doc {
+				height: calc(100% - 36px);
+				padding: 16px 18px;
+				overflow: hidden;
+			}
+
+			.html-doc .eyebrow {
+				font-size: 9.5px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #4f46e5;
+			}
+
+			.html-doc h1 {
+				margin-top: 5px;
+				font-size: 15px;
+				font-weight: 650;
+				line-height: 1.25;
+				letter-spacing: -0.02em;
+			}
+
+			.html-doc .step {
+				display: flex;
+				gap: 10px;
+				margin-top: 12px;
+			}
+
+			.html-doc .num {
+				flex: none;
+				width: 22px;
+				height: 22px;
+				border-radius: 7px;
+				display: grid;
+				place-items: center;
+				background: #4f46e5;
+				color: #fff;
+				font-size: 11px;
+				font-weight: 600;
+			}
+
+			.html-doc .step-body {
+				min-width: 0;
+				flex: 1;
+			}
+
+			.html-doc .step-body h2 {
+				font-size: 12px;
+				font-weight: 600;
+			}
+
+			.html-doc .step-body p {
+				margin-top: 3px;
+				font-size: 10.5px;
+				line-height: 1.45;
+				color: rgb(13 13 13 / 0.64);
+			}
+
+			.html-doc .step-body img {
+				display: block;
+				width: 100%;
+				height: 96px;
+				margin-top: 8px;
+				object-fit: cover;
+				object-position: top;
+				border-radius: 8px;
+				border: 1px solid rgb(13 13 13 / 0.08);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="window">
+			<div class="panel md">
+				<div class="panel-head"><strong>Markdown</strong><span>connect-slack/guide.md</span></div>
+				<div class="md-body">
+					<div class="md-tree">
+						<div class="folder">connect-slack/</div>
+						<div class="file active">guide.md</div>
+						<div class="file">images/</div>
+						<div class="file nested">step-01.png</div>
+						<div class="file nested">step-02.png</div>
+						<div class="file nested">step-03.png</div>
+					</div>
+					<div class="md-editor"><span class="h1"># Connect Slack to your workspace</span>
+
+Link Slack so your team gets notified when invoices are paid, deals close, or a customer needs a reply.
+
+<span class="h2">## Before you start</span>
+- Admin access to the workspace
+- Permission to install apps in Slack
+
+<span class="h2">## 1. Open Integrations</span>
+
+In the left sidebar, click <span class="bold">Integrations</span>.
+
+<span class="link">![Step 1](images/step-01.png)</span>
+
+<span class="h2">## 2. Choose Slack</span>
+
+Find <span class="bold">Slack</span> and click <span class="bold">Connect</span>.
+
+<span class="muted">…</span></div>
+				</div>
+			</div>
+
+			<div class="panel pdf">
+				<div class="panel-head"><strong>PDF</strong><span>connect-slack.pdf</span></div>
+				<div class="pdf-body">
+					<h1>Connect Slack to your workspace</h1>
+					<p class="lede">
+						Link Slack so your team gets notified when invoices are paid, deals close, or a customer
+						needs a reply.
+					</p>
+					<div class="pdf-step">
+						<div class="pdf-step-head"><span>01</span> Open Integrations</div>
+						<p>
+							In the left sidebar, click Integrations. The page lists every service you can connect.
+						</p>
+						<img src="../static/images/frames/slack-step-01.png" alt="" />
+					</div>
+				</div>
+				<div class="pdf-foot">
+					<span>Generated with Steppy</span>
+					<span>Page 1 of 3</span>
+				</div>
+			</div>
+
+			<div class="panel html">
+				<div class="html-bar">
+					<div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+					<span>connect-slack.html</span>
+					<strong style="margin-left: auto; font-size: 11px; color: rgb(13 13 13 / 0.48)">HTML</strong>
+				</div>
+				<div class="html-doc">
+					<p class="eyebrow">Step-by-step guide</p>
+					<h1>Connect Slack to your workspace</h1>
+					<div class="step">
+						<span class="num">1</span>
+						<div class="step-body">
+							<h2>Open Integrations</h2>
+							<p>
+								In the left sidebar, click <strong>Integrations</strong>. The page lists every
+								service you can connect.
+							</p>
+							<img src="../static/images/frames/slack-step-01.png" alt="" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

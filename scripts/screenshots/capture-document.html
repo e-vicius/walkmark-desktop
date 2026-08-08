@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Steppy AI writing capture</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+			}
+
+			body {
+				width: 1280px;
+				background: #f8f8f8;
+				color: #0d0d0d;
+				font-family:
+					-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.window {
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 12px;
+				background: #f8f8f8;
+			}
+
+			.titlebar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				height: 52px;
+				padding: 0 12px 0 78px;
+				border-bottom: 1px solid rgb(13 13 13 / 0.08);
+				background: #fff;
+			}
+
+			.traffic {
+				position: absolute;
+				left: 16px;
+				top: 18px;
+				display: flex;
+				gap: 8px;
+			}
+
+			.traffic span {
+				width: 12px;
+				height: 12px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.12);
+			}
+
+			.title-left {
+				display: flex;
+				min-width: 0;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.back {
+				display: grid;
+				place-items: center;
+				width: 32px;
+				height: 32px;
+				border-radius: 14px;
+				color: rgb(13 13 13 / 0.56);
+			}
+
+			.doc-title {
+				overflow: hidden;
+				font-size: 14px;
+				font-weight: 500;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			.doc-meta {
+				margin-left: 8px;
+				font-size: 12px;
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.actions {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+			}
+
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				height: 32px;
+				padding: 0 12px;
+				border: 0;
+				border-radius: 999px;
+				font: 500 13px/1 inherit;
+				white-space: nowrap;
+			}
+
+			.btn-ghost {
+				background: rgb(13 13 13 / 0.05);
+				color: rgb(13 13 13 / 0.72);
+			}
+
+			.btn-model {
+				max-width: 196px;
+				padding-right: 10px;
+				color: rgb(13 13 13 / 0.72);
+			}
+
+			.btn-model span {
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.btn-model svg:last-child {
+				margin-left: auto;
+				opacity: 0.5;
+			}
+
+			.btn-primary {
+				background: #0d0d0d;
+				color: #f8f8f8;
+			}
+
+			.btn-primary.busy {
+				opacity: 0.72;
+			}
+
+			.icon-btn {
+				display: grid;
+				place-items: center;
+				width: 32px;
+				height: 32px;
+				border: 0;
+				border-radius: 14px;
+				background: transparent;
+				color: rgb(13 13 13 / 0.56);
+			}
+
+			.shell {
+				display: flex;
+				height: 820px;
+			}
+
+			.rail {
+				width: 248px;
+				flex-shrink: 0;
+				border-right: 1px solid rgb(13 13 13 / 0.08);
+				background: #fff;
+			}
+
+			.rail-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 12px 16px;
+			}
+
+			.rail-head span {
+				font-size: 11.5px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.rail-list {
+				padding: 0 8px 16px;
+			}
+
+			.rail-item {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 4px;
+				border-radius: 12px;
+			}
+
+			.rail-item.active {
+				background: rgb(13 13 13 / 0.08);
+			}
+
+			.rail-item.pending .rail-label {
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.rail-num {
+				width: 16px;
+				flex-shrink: 0;
+				font-size: 11px;
+				font-weight: 500;
+				text-align: center;
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.rail-item.active .rail-num {
+				color: #0d0d0d;
+			}
+
+			.rail-thumb {
+				position: relative;
+				width: 60px;
+				height: 38px;
+				flex-shrink: 0;
+				overflow: hidden;
+				border-radius: 8px;
+				background: rgb(13 13 13 / 0.05);
+			}
+
+			.rail-item.active .rail-thumb {
+				box-shadow: 0 0 0 2px rgb(13 13 13 / 0.24);
+			}
+
+			.rail-thumb img {
+				display: block;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: top;
+			}
+
+			.rail-badge {
+				position: absolute;
+				right: 3px;
+				bottom: 3px;
+				display: grid;
+				place-items: center;
+				width: 14px;
+				height: 14px;
+				border-radius: 999px;
+				background: #0d0d0d;
+				color: #f8f8f8;
+			}
+
+			.rail-label {
+				min-width: 0;
+				flex: 1;
+				font-size: 12px;
+				line-height: 1.35;
+			}
+
+			.editor {
+				min-width: 0;
+				flex: 1;
+				overflow: hidden;
+				padding: 32px 40px;
+			}
+
+			.inner {
+				max-width: 840px;
+				margin: 0 auto;
+			}
+
+			.doc-meta-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-bottom: 12px;
+				font-size: 12px;
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.writing-pill {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				padding: 3px 8px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.06);
+				color: rgb(13 13 13 / 0.64);
+				font-size: 11.5px;
+				font-weight: 500;
+			}
+
+			.spinner {
+				width: 10px;
+				height: 10px;
+				border: 1.5px solid rgb(13 13 13 / 0.16);
+				border-top-color: rgb(13 13 13 / 0.56);
+				border-radius: 999px;
+				animation: spin 0.8s linear infinite;
+			}
+
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.doc-heading {
+				font-size: 27px;
+				font-weight: 600;
+				line-height: 1.2;
+				letter-spacing: -0.02em;
+			}
+
+			.doc-summary {
+				margin-top: 10px;
+				font-size: 14.5px;
+				line-height: 1.55;
+				color: rgb(13 13 13 / 0.72);
+			}
+
+			.prereq {
+				margin-top: 20px;
+				padding: 14px;
+				border-radius: 24px;
+				background: rgb(13 13 13 / 0.05);
+			}
+
+			.prereq-label {
+				margin-bottom: 8px;
+				font-size: 11.5px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.prereq li {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 13px;
+				color: rgb(13 13 13 / 0.72);
+				list-style: none;
+				padding: 2px 0;
+			}
+
+			.prereq li::before {
+				content: '';
+				width: 4px;
+				height: 4px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.4);
+			}
+
+			.steps {
+				margin-top: 32px;
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+
+			.step {
+				border-radius: 24px;
+				background: #fff;
+				box-shadow: 0 0 0 1px rgb(13 13 13 / 0.06);
+			}
+
+			.step.active {
+				box-shadow: 0 0 0 1px rgb(13 13 13 / 0.12);
+			}
+
+			.step-head {
+				display: flex;
+				gap: 12px;
+				padding: 16px 16px 8px;
+			}
+
+			.step-num {
+				display: grid;
+				place-items: center;
+				width: 28px;
+				height: 28px;
+				flex-shrink: 0;
+				border-radius: 12px;
+				background: #0d0d0d;
+				color: #f8f8f8;
+				font-size: 12.5px;
+				font-weight: 600;
+			}
+
+			.step-title {
+				padding-top: 2px;
+				font-size: 15px;
+				font-weight: 600;
+			}
+
+			.step-frame {
+				margin: 0 16px;
+				overflow: hidden;
+				border-radius: 16px;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				background: #f8f8f8;
+			}
+
+			.step-frame img {
+				display: block;
+				width: 100%;
+			}
+
+			.step-body {
+				padding: 12px 16px 16px 56px;
+				font-size: 14px;
+				line-height: 1.55;
+				color: rgb(13 13 13 / 0.72);
+			}
+
+			.step-body strong {
+				font-weight: 600;
+				color: rgb(13 13 13 / 0.88);
+			}
+
+			.skeleton {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				padding: 4px 0 2px;
+			}
+
+			.skeleton span {
+				display: block;
+				height: 14px;
+				border-radius: 8px;
+				background: rgb(13 13 13 / 0.08);
+			}
+
+			.skeleton span:nth-child(1) {
+				width: 58%;
+				height: 16px;
+			}
+
+			.skeleton span:nth-child(2) {
+				width: 100%;
+			}
+
+			.skeleton span:nth-child(3) {
+				width: 82%;
+			}
+
+			.step-placeholder {
+				padding: 4px 0 2px;
+				font-size: 14px;
+				line-height: 1.55;
+				color: rgb(13 13 13 / 0.36);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="window">
+			<div style="position: relative">
+				<div class="traffic" aria-hidden="true"><span></span><span></span><span></span></div>
+				<header class="titlebar">
+					<div class="title-left">
+						<div class="back" aria-hidden="true">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+								<path d="m15 18-6-6 6-6" />
+							</svg>
+						</div>
+						<span class="doc-title">Send an invoice to a customer</span>
+						<span class="doc-meta">5 steps</span>
+					</div>
+					<div class="actions">
+						<button class="btn btn-ghost btn-model" type="button">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+								<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+							</svg>
+							<span>Gemini 3.6</span>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+								<path d="m6 9 6 6 6-6" />
+							</svg>
+						</button>
+						<button class="btn btn-primary busy" type="button">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+								<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+							</svg>
+							Writing 3 steps
+						</button>
+						<button class="btn btn-ghost" type="button">Export</button>
+						<button class="icon-btn" type="button" aria-label="Settings">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+								<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+							</svg>
+						</button>
+					</div>
+				</header>
+			</div>
+
+			<div class="shell">
+				<aside class="rail">
+					<div class="rail-head"><span>Steps</span><span>5</span></div>
+					<ol class="rail-list">
+						<li class="rail-item">
+							<span class="rail-num">1</span>
+							<div class="rail-thumb">
+								<img src="../static/images/frames/000003200-462a84.png" alt="" />
+								<div class="rail-badge" aria-hidden="true">
+									<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+										<path d="M20 6 9 17l-5-5" />
+									</svg>
+								</div>
+							</div>
+							<span class="rail-label">Open the billing settings</span>
+						</li>
+						<li class="rail-item active">
+							<span class="rail-num">2</span>
+							<div class="rail-thumb"><img src="../static/images/frames/000010000-ab454c.png" alt="" /></div>
+							<span class="rail-label">Start a new invoice</span>
+						</li>
+						<li class="rail-item pending">
+							<span class="rail-num">3</span>
+							<div class="rail-thumb"><img src="../static/images/frames/000016800-393e9c.png" alt="" /></div>
+							<span class="rail-label">Pick the customer</span>
+						</li>
+						<li class="rail-item pending">
+							<span class="rail-num">4</span>
+							<div class="rail-thumb"><img src="../static/images/frames/000023600-4526e0.png" alt="" /></div>
+							<span class="rail-label">Add the line items</span>
+						</li>
+						<li class="rail-item pending">
+							<span class="rail-num">5</span>
+							<div class="rail-thumb"><img src="../static/images/frames/000030400-80e335.png" alt="" /></div>
+							<span class="rail-label">Send the invoice</span>
+						</li>
+					</ol>
+				</aside>
+
+				<div class="editor">
+					<div class="inner">
+						<div class="doc-meta-row">
+							<span>General · Recorded from Stripe Dashboard — Chrome · 2 days ago</span>
+							<span class="writing-pill">
+								<span class="spinner" aria-hidden="true"></span>
+								Writing step 2 of 5
+							</span>
+						</div>
+						<h1 class="doc-heading">Send an invoice to a customer</h1>
+						<p class="doc-summary">
+							Create an invoice from the billing area, add the customer and line items, then send it
+							for payment.
+						</p>
+						<div class="prereq">
+							<p class="prereq-label">Before you start</p>
+							<ul>
+								<li>An account with the Billing permission</li>
+								<li>The customer already saved in your address book</li>
+							</ul>
+						</div>
+
+						<div class="steps">
+							<article class="step">
+								<div class="step-head">
+									<div class="step-num">1</div>
+									<h2 class="step-title">Open the billing settings</h2>
+								</div>
+								<div class="step-frame">
+									<img src="../static/images/frames/000003200-462a84.png" alt="" />
+								</div>
+								<p class="step-body">
+									From the sidebar, select <strong>Settings</strong>, then choose
+									<strong>Billing</strong>. The billing overview lists your current plan along with
+									the next renewal date.
+								</p>
+							</article>
+
+							<article class="step active">
+								<div class="step-head">
+									<div class="step-num">2</div>
+									<div class="skeleton" aria-hidden="true">
+										<span></span>
+										<span></span>
+										<span></span>
+									</div>
+								</div>
+								<div class="step-frame">
+									<img src="../static/images/frames/000010000-ab454c.png" alt="" />
+								</div>
+								<p class="step-placeholder">
+									Reading the screenshot and drafting instructions…
+								</p>
+							</article>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

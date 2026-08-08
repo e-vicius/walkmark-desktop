@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Steppy export capture</title>
+		<style>
+			* { box-sizing: border-box; margin: 0; }
+			body {
+				width: 720px;
+				background: #f8f8f8;
+				font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+				-webkit-font-smoothing: antialiased;
+				color: #0d0d0d;
+			}
+			.window {
+				height: 480px;
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 12px;
+				background: #fff;
+			}
+			.chrome {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				height: 36px;
+				padding: 0 12px;
+				border-bottom: 1px solid rgb(13 13 13 / 0.08);
+				background: #f8f8f8;
+				font-size: 12px;
+				color: rgb(13 13 13 / 0.56);
+			}
+			.dots { display: flex; gap: 6px; }
+			.dots span {
+				width: 8px;
+				height: 8px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.14);
+			}
+			.doc {
+				height: calc(480px - 36px);
+				overflow: hidden;
+				padding: 28px 32px;
+				background: #fff;
+			}
+			.eyebrow {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(13 13 13 / 0.4);
+			}
+			h1 {
+				margin-top: 8px;
+				font-size: 22px;
+				font-weight: 600;
+				line-height: 1.2;
+				letter-spacing: -0.02em;
+			}
+			.lede {
+				margin-top: 8px;
+				font-size: 13px;
+				line-height: 1.55;
+				color: rgb(13 13 13 / 0.64);
+			}
+			.meta {
+				margin-top: 8px;
+				font-size: 12px;
+				color: rgb(13 13 13 / 0.4);
+			}
+			.steps {
+				margin-top: 20px;
+				padding: 0;
+				list-style: none;
+			}
+			.step {
+				display: grid;
+				grid-template-columns: 28px 1fr;
+				gap: 12px;
+				margin-bottom: 18px;
+			}
+			.num {
+				display: grid;
+				place-items: center;
+				width: 28px;
+				height: 28px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.06);
+				font-size: 12px;
+				font-weight: 600;
+			}
+			.step h2 {
+				font-size: 14px;
+				font-weight: 600;
+				line-height: 28px;
+			}
+			.prose {
+				grid-column: 2;
+				margin-top: -8px;
+				font-size: 12.5px;
+				line-height: 1.55;
+				color: rgb(13 13 13 / 0.64);
+			}
+			.prose strong { font-weight: 600; color: rgb(13 13 13 / 0.88); }
+			figure {
+				grid-column: 2;
+				margin-top: 8px;
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 10px;
+			}
+			figure img { display: block; width: 100%; }
+		</style>
+	</head>
+	<body>
+		<div class="window">
+			<div class="chrome">
+				<div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+				<span>send-an-invoice.html — exported guide</span>
+			</div>
+			<article class="doc">
+				<p class="eyebrow">Step-by-step guide</p>
+				<h1>Send an invoice to a customer</h1>
+				<p class="lede">
+					Create an invoice from the billing area, add the customer and line items, then send it
+					for payment.
+				</p>
+				<p class="meta">5 steps · Generated with Steppy</p>
+
+				<ol class="steps">
+					<li class="step">
+						<span class="num">1</span>
+						<h2>Open the billing settings</h2>
+						<p class="prose">
+							From the sidebar, select <strong>Settings</strong>, then choose
+							<strong>Billing</strong>.
+						</p>
+						<figure>
+							<img src="../static/images/frames/000003200-462a84.png" alt="" />
+						</figure>
+					</li>
+					<li class="step">
+						<span class="num">2</span>
+						<h2>Start a new invoice</h2>
+						<p class="prose">
+							Click <strong>New invoice</strong> in the top right. A draft is created immediately.
+						</p>
+						<figure>
+							<img src="../static/images/frames/000010000-ab454c.png" alt="" />
+						</figure>
+					</li>
+				</ol>
+			</article>
+		</div>
+	</body>
+</html>

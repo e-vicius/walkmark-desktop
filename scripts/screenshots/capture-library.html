@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Steppy library capture</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+			}
+
+			body {
+				width: 1200px;
+				background: #f8f8f8;
+				color: #0d0d0d;
+				font-family:
+					-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.window {
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 12px;
+				background: #f8f8f8;
+			}
+
+			.titlebar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				height: 52px;
+				padding: 0 12px 0 78px;
+				border-bottom: 1px solid rgb(13 13 13 / 0.08);
+				background: #fff;
+			}
+
+			.traffic {
+				position: absolute;
+				left: 16px;
+				top: 18px;
+				display: flex;
+				gap: 8px;
+			}
+
+			.traffic span {
+				width: 12px;
+				height: 12px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.12);
+			}
+
+			.brand {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.mark {
+				display: grid;
+				place-items: center;
+				width: 28px;
+				height: 28px;
+				border-radius: 10px;
+				background: #0d0d0d;
+				color: #f8f8f8;
+			}
+
+			.mark svg {
+				width: 58%;
+				height: 58%;
+			}
+
+			.brand-name {
+				font-size: 14px;
+				font-weight: 600;
+				letter-spacing: -0.01em;
+			}
+
+			.actions {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				height: 36px;
+				padding: 0 16px;
+				border: 0;
+				border-radius: 999px;
+				background: #0d0d0d;
+				color: #f8f8f8;
+				font: 500 14px/1 inherit;
+			}
+
+			.icon-btn {
+				display: grid;
+				place-items: center;
+				width: 32px;
+				height: 32px;
+				border: 0;
+				border-radius: 14px;
+				background: transparent;
+				color: rgb(13 13 13 / 0.56);
+			}
+
+			.main {
+				padding: 48px 32px 56px;
+			}
+
+			.inner {
+				max-width: 960px;
+				margin: 0 auto;
+			}
+
+			.section-label {
+				margin-bottom: 16px;
+				font-size: 12px;
+				font-weight: 500;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: rgb(13 13 13 / 0.4);
+			}
+
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 16px;
+			}
+
+			.card {
+				overflow: hidden;
+				border-radius: 24px;
+				background: #fff;
+			}
+
+			.thumb {
+				aspect-ratio: 16 / 10;
+				overflow: hidden;
+				background: #f8f8f8;
+			}
+
+			.thumb img {
+				display: block;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: top;
+			}
+
+			.meta {
+				padding: 16px;
+			}
+
+			.meta h3 {
+				overflow: hidden;
+				font-size: 14px;
+				font-weight: 500;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			.meta p {
+				margin-top: 4px;
+				font-size: 12px;
+				color: rgb(13 13 13 / 0.56);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="window">
+			<div style="position: relative">
+				<div class="traffic" aria-hidden="true">
+					<span></span><span></span><span></span>
+				</div>
+				<header class="titlebar">
+					<div class="brand">
+						<div class="mark">
+							<svg viewBox="0 0 24 24" fill="currentColor">
+								<rect x="3" y="15.5" width="8.5" height="3.5" rx="1.75" opacity="0.42" />
+								<rect x="7.25" y="10.25" width="8.5" height="3.5" rx="1.75" opacity="0.72" />
+								<rect x="11.5" y="5" width="8.5" height="3.5" rx="1.75" />
+							</svg>
+						</div>
+						<span class="brand-name">Steppy</span>
+					</div>
+					<div class="actions">
+						<button class="btn" type="button">New recording</button>
+						<button class="icon-btn" type="button" aria-label="Settings">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+								<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+							</svg>
+						</button>
+					</div>
+				</header>
+			</div>
+
+			<main class="main">
+				<div class="inner">
+					<h2 class="section-label">Your documents</h2>
+					<div class="grid">
+						<article class="card">
+							<div class="thumb"><img src="../static/images/covers/invoice.png" alt="" /></div>
+							<div class="meta">
+								<h3>Send an invoice to a customer</h3>
+								<p>5 steps · 2 days ago</p>
+							</div>
+						</article>
+						<article class="card">
+							<div class="thumb"><img src="../static/images/covers/slack.png" alt="" /></div>
+							<div class="meta">
+								<h3>Connect Slack to your workspace</h3>
+								<p>5 steps · Yesterday</p>
+							</div>
+						</article>
+						<article class="card">
+							<div class="thumb"><img src="../static/images/covers/password.png" alt="" /></div>
+							<div class="meta">
+								<h3>Reset a user's password</h3>
+								<p>4 steps · Yesterday</p>
+							</div>
+						</article>
+						<article class="card">
+							<div class="thumb"><img src="../static/images/covers/product.png" alt="" /></div>
+							<div class="meta">
+								<h3>Add a product to your storefront</h3>
+								<p>5 steps · Today</p>
+							</div>
+						</article>
+						<article class="card">
+							<div class="thumb"><img src="../static/images/covers/report.png" alt="" /></div>
+							<div class="meta">
+								<h3>Export a monthly sales report</h3>
+								<p>4 steps · Today</p>
+							</div>
+						</article>
+					</div>
+				</div>
+			</main>
+		</div>
+	</body>
+</html>

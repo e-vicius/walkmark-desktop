@@ -8,6 +8,18 @@ Steppy is a native desktop app. You pick a screen or window, do the task, and it
 **Download:** [Latest release](https://github.com/e-vicius/steppy/releases/latest)  
 **Marketing site source:** [steppy-landing](https://github.com/e-vicius/steppy-landing)
 
+<p align="center">
+  <img src="docs/screenshots/library.png" alt="Steppy library with saved guides" width="900" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/editor.png" alt="Step editor with AI-written steps" width="900" />
+</p>
+
+| Record | Edit | Export |
+| --- | --- | --- |
+| <img src="docs/screenshots/step-record.png" alt="Recording a workflow" width="280" /> | <img src="docs/screenshots/step-tidy.png" alt="Editing steps and blur" width="280" /> | <img src="docs/screenshots/step-export.png" alt="Exported guide" width="280" /> |
+
 ## Download
 
 | Platform | Install |

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Steppy tidy capture</title>
+		<style>
+			* { box-sizing: border-box; margin: 0; }
+			body {
+				width: 720px;
+				background: #f8f8f8;
+				color: #0d0d0d;
+				font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+				-webkit-font-smoothing: antialiased;
+			}
+			.window {
+				height: 480px;
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 12px;
+				background: #f8f8f8;
+				display: flex;
+				flex-direction: column;
+			}
+			.titlebar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				height: 44px;
+				padding: 0 12px 0 52px;
+				border-bottom: 1px solid rgb(13 13 13 / 0.08);
+				background: #fff;
+				font-size: 13px;
+				font-weight: 500;
+			}
+			.traffic {
+				position: absolute;
+				left: 14px;
+				top: 16px;
+				display: flex;
+				gap: 7px;
+			}
+			.traffic span {
+				width: 10px;
+				height: 10px;
+				border-radius: 999px;
+				background: rgb(13 13 13 / 0.12);
+			}
+			.shell { display: flex; flex: 1; min-height: 0; }
+			.rail {
+				width: 132px;
+				flex-shrink: 0;
+				border-right: 1px solid rgb(13 13 13 / 0.08);
+				background: #fff;
+				padding: 10px 8px;
+			}
+			.rail-label {
+				display: flex;
+				justify-content: space-between;
+				padding: 2px 6px 10px;
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: rgb(13 13 13 / 0.4);
+			}
+			.rail-item {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 4px;
+				margin-bottom: 4px;
+				border-radius: 12px;
+			}
+			.rail-item.active { background: rgb(13 13 13 / 0.08); }
+			.rail-num {
+				width: 14px;
+				font-size: 11px;
+				font-weight: 500;
+				text-align: center;
+				color: rgb(13 13 13 / 0.4);
+			}
+			.rail-thumb {
+				width: 52px;
+				height: 32px;
+				flex-shrink: 0;
+				overflow: hidden;
+				border-radius: 8px;
+				background: rgb(13 13 13 / 0.05);
+			}
+			.rail-item.active .rail-thumb { box-shadow: 0 0 0 2px rgb(13 13 13 / 0.2); }
+			.rail-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+			.editor {
+				flex: 1;
+				min-width: 0;
+				padding: 16px 20px;
+				overflow: hidden;
+			}
+			.step-num {
+				display: grid;
+				place-items: center;
+				width: 28px;
+				height: 28px;
+				border-radius: 12px;
+				background: #0d0d0d;
+				color: #f8f8f8;
+				font-size: 12px;
+				font-weight: 600;
+			}
+			.step-head {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 10px;
+			}
+			.step-title { font-size: 15px; font-weight: 600; }
+			.annotator {
+				position: relative;
+				overflow: hidden;
+				border-radius: 16px;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				background: #fff;
+			}
+			.annotator img { display: block; width: 100%; }
+			.redact {
+				position: absolute;
+				top: 19%;
+				right: 11%;
+				width: 30%;
+				height: 10%;
+				border-radius: 6px;
+				background: rgb(13 13 13 / 0.78);
+			}
+			.toolbar {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				display: flex;
+				gap: 4px;
+				padding: 4px;
+				border-radius: 14px;
+				background: rgb(255 255 255 / 0.94);
+				border: 1px solid rgb(13 13 13 / 0.08);
+				font-size: 11px;
+				font-weight: 500;
+				box-shadow: 0 4px 16px rgb(0 0 0 / 0.08);
+			}
+			.tool {
+				padding: 5px 10px;
+				border-radius: 999px;
+				color: rgb(13 13 13 / 0.56);
+			}
+			.tool.active { background: rgb(13 13 13 / 0.08); color: #0d0d0d; }
+			.body-text {
+				margin-top: 10px;
+				font-size: 13px;
+				line-height: 1.5;
+				color: rgb(13 13 13 / 0.64);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="window">
+			<div style="position: relative">
+				<div class="traffic" aria-hidden="true"><span></span><span></span><span></span></div>
+				<div class="titlebar">Send an invoice to a customer · 5 steps</div>
+			</div>
+			<div class="shell">
+				<aside class="rail">
+					<div class="rail-label"><span>Steps</span><span>5</span></div>
+					<div class="rail-item">
+						<span class="rail-num">1</span>
+						<div class="rail-thumb"><img src="../static/images/frames/000003200-462a84.png" alt="" /></div>
+					</div>
+					<div class="rail-item">
+						<span class="rail-num">2</span>
+						<div class="rail-thumb"><img src="../static/images/frames/000010000-ab454c.png" alt="" /></div>
+					</div>
+					<div class="rail-item active">
+						<span class="rail-num">3</span>
+						<div class="rail-thumb"><img src="../static/images/frames/000016800-393e9c.png" alt="" /></div>
+					</div>
+					<div class="rail-item">
+						<span class="rail-num">4</span>
+						<div class="rail-thumb"><img src="../static/images/frames/000023600-4526e0.png" alt="" /></div>
+					</div>
+				</aside>
+				<div class="editor">
+					<div class="step-head">
+						<div class="step-num">3</div>
+						<h2 class="step-title">Pick the customer</h2>
+					</div>
+					<div class="annotator">
+						<div class="toolbar">
+							<span class="tool active">Blur</span>
+							<span class="tool">Highlight</span>
+							<span class="tool">Crop</span>
+						</div>
+						<img src="../static/images/frames/000016800-393e9c.png" alt="" />
+						<div class="redact" aria-hidden="true"></div>
+					</div>
+					<p class="body-text">
+						Type the customer's name into the <strong>Bill to</strong> field — blur the tax ID
+						before you export.
+					</p>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

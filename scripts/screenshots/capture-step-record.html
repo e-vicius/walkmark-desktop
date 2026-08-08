@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Steppy record capture</title>
+		<style>
+			* { box-sizing: border-box; margin: 0; }
+			body {
+				width: 720px;
+				background: #e8e8ea;
+				font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+				-webkit-font-smoothing: antialiased;
+			}
+			.window {
+				position: relative;
+				height: 480px;
+				overflow: hidden;
+				border: 1px solid rgb(13 13 13 / 0.08);
+				border-radius: 12px;
+				background: #d4d4d8;
+			}
+			.app {
+				position: absolute;
+				inset: 18px 18px 72px;
+				overflow: hidden;
+				border-radius: 10px;
+				border: 1px solid rgb(13 13 13 / 0.1);
+				box-shadow: 0 20px 50px rgb(0 0 0 / 0.12);
+			}
+			.app img {
+				display: block;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: top;
+			}
+			.hud {
+				position: absolute;
+				left: 50%;
+				bottom: 18px;
+				transform: translateX(-50%);
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				padding: 10px 12px 10px 14px;
+				border: 1px solid rgb(255 255 255 / 0.1);
+				border-radius: 20px;
+				background: rgb(21 22 28 / 0.96);
+				box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+				backdrop-filter: blur(16px);
+				color: #fff;
+				white-space: nowrap;
+			}
+			.rec-dot-wrap { position: relative; width: 10px; height: 10px; flex-shrink: 0; }
+			.rec-dot {
+				position: absolute;
+				inset: 0;
+				border-radius: 999px;
+				background: #f2555a;
+			}
+			.rec-pulse {
+				position: absolute;
+				inset: -4px;
+				border-radius: 999px;
+				background: rgb(242 85 90 / 0.45);
+			}
+			.timer {
+				font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+				font-size: 15px;
+				font-weight: 500;
+				line-height: 1;
+			}
+			.sub {
+				margin-top: 4px;
+				font-size: 11px;
+				color: rgb(255 255 255 / 0.5);
+			}
+			.bars {
+				display: flex;
+				align-items: flex-end;
+				gap: 3px;
+				height: 24px;
+				padding: 0 4px;
+			}
+			.bar {
+				width: 3px;
+				border-radius: 999px;
+				background: #6366f1;
+			}
+			.actions { display: flex; gap: 6px; margin-left: 4px; }
+			.icon {
+				display: grid;
+				place-items: center;
+				width: 36px;
+				height: 36px;
+				border-radius: 12px;
+				background: rgb(255 255 255 / 0.08);
+				color: rgb(255 255 255 / 0.85);
+			}
+			.icon.stop { background: #f2555a; color: #fff; }
+		</style>
+	</head>
+	<body>
+		<div class="window">
+			<div class="app">
+				<img src="../static/images/frames/000003200-462a84.png" alt="" />
+			</div>
+			<div class="hud">
+				<div class="rec-dot-wrap">
+					<span class="rec-pulse"></span>
+					<span class="rec-dot"></span>
+				</div>
+				<div>
+					<div class="timer">02:14</div>
+					<div class="sub">3 steps captured</div>
+				</div>
+				<div class="bars" aria-hidden="true">
+					<span class="bar" style="height: 8px"></span>
+					<span class="bar" style="height: 11px"></span>
+					<span class="bar" style="height: 14px"></span>
+					<span class="bar" style="height: 17px"></span>
+					<span class="bar" style="height: 11px; background: rgb(255 255 255 / 0.12)"></span>
+				</div>
+				<div class="actions" aria-hidden="true">
+					<span class="icon">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+							<path d="M14.5 4h1.2a2 2 0 0 1 2 2v11.8a2 2 0 0 1-2 2h-1.2M4 7.8V16.2a2 2 0 0 0 2 2h9.8M4 7.8 16.2 7.8M4 16.2 16.2 16.2" />
+						</svg>
+					</span>
+					<span class="icon">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" />
+						</svg>
+					</span>
+					<span class="icon stop">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+							<rect x="6" y="6" width="12" height="12" rx="2" />
+						</svg>
+					</span>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
