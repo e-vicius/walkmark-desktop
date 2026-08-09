@@ -16,7 +16,8 @@ Optional: run `python3 scripts/seed_demo.py` first if you also refresh marketing
 | File | Shows |
 | --- | --- |
 | `library.png` | Guide library |
-| `editor.png` | Editor with AI-written steps |
+| `editor.png` | Editor with AI-written steps (Playwright mock) |
+| `readme-editor.png` | Real app capture for the GitHub README (not overwritten by capture) |
 | `export.png` | Export dialog |
 | `step-record.png` | Recording a workflow |
 | `step-tidy.png` | Editing steps and blur |
