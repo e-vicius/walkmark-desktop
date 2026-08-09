@@ -25,10 +25,6 @@ Guides for the open source desktop app. The same docs are published at [steppy.a
 | [Architecture](architecture.md) | Tauri layout, modules, IPC, data flow |
 | [Contributing](https://github.com/e-vicius/steppy/blob/main/CONTRIBUTING.md) | PRs, tests, code style |
 
-## Screenshots
-
-App previews for the README live in [`screenshots/`](screenshots/README.md). Regenerate with `pnpm capture:screenshots` after UI changes.
-
 ## Quick links
 
 - [Download latest release](https://github.com/e-vicius/steppy/releases/latest)
