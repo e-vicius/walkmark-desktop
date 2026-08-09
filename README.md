@@ -13,7 +13,7 @@ Turn a workflow you do once into step-by-step documentation someone else can fol
 Steppy is a native desktop app. You pick a screen or window, do the task, and it captures each meaningful step with a screenshot. When you are ready, an AI model writes the instructions. Export as Markdown, a single HTML file, or PDF.
 
 <p align="center">
-  <img src="docs/screenshots/editor.png" alt="Steppy document editor with AI writing step instructions" width="900" />
+  <img src="docs/screenshots/editor.png" alt="Steppy document editor with AI-written steps and export" width="900" />
 </p>
 
 **Website:** [steppy.app](https://steppy.app) · **Docs:** [steppy.app/docs](https://steppy.app/docs)  
