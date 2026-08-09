@@ -36,7 +36,7 @@ xcap = "0.9"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
 printpdf = { version = "0.12", default-features = false, features = ["png", "jpeg"] }
 
-base64 = "0.22"
+base64 = "0.23"
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
