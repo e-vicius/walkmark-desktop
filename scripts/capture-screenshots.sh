@@ -8,6 +8,8 @@ OUT="$ROOT/docs/screenshots"
 
 mkdir -p "$OUT"
 
+python3 "$ROOT/scripts/generate_screenshot_assets.py"
+
 node --input-type=module <<EOF
 import { chromium } from 'playwright';
 import path from 'node:path';

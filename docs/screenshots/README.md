@@ -5,9 +5,11 @@ PNG previews for the GitHub README and docs. They are rendered from static HTML 
 Regenerate after UI changes:
 
 ```bash
-pnpm install   # needs playwright
+pnpm install   # needs playwright + pillow (for asset generation)
 pnpm capture:screenshots
 ```
+
+Asset PNGs under [`scripts/static/images/`](../scripts/static/images/) are generated automatically by `scripts/generate_screenshot_assets.py`.
 
 Optional: run `python3 scripts/seed_demo.py` first if you also refresh marketing assets that use real demo project frames.
 
