@@ -1,8 +1,20 @@
+<p align="center">
+  <img src="src-tauri/icons/128x128@2x.png" alt="Steppy logo" width="128" />
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
+</p>
+
 # Steppy
 
 Turn a workflow you do once into step-by-step documentation someone else can follow.
 
 Steppy is a native desktop app. You pick a screen or window, do the task, and it captures each meaningful step with a screenshot. When you are ready, an AI model writes the instructions. Export as Markdown, a single HTML file, or PDF.
+
+<p align="center">
+  <img src="docs/screenshots/editor.png" alt="Steppy document editor with AI writing step instructions" width="900" />
+</p>
 
 **Website:** [steppy.app](https://steppy.app) · **Docs:** [steppy.app/docs](https://steppy.app/docs)  
 **Download:** [Latest release](https://github.com/e-vicius/steppy/releases/latest)  
