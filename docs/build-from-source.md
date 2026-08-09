@@ -16,7 +16,7 @@ Compile Steppy locally for development, custom builds, or platforms without a pr
 ## Clone and install
 
 ```bash
-git clone https://github.com/e-vicius/steppy.git
+git clone https://github.com/e-vicius/steppy-desktop.git
 cd steppy
 pnpm install
 ```
@@ -103,15 +103,15 @@ Deep dive: [Architecture](architecture.md).
 
 ## Release process (maintainers)
 
-Documented in [RELEASE.md](https://github.com/e-vicius/steppy/blob/main/RELEASE.md). Summary:
+Documented in [RELEASE.md](https://github.com/e-vicius/steppy-desktop/blob/main/RELEASE.md). Summary:
 
 1. Bump version in `src-tauri/tauri.conf.json` and `package.json`.
-2. Update [CHANGELOG.md](https://github.com/e-vicius/steppy/blob/main/CHANGELOG.md).
+2. Update [CHANGELOG.md](https://github.com/e-vicius/steppy-desktop/blob/main/CHANGELOG.md).
 3. Tag `vX.Y.Z` and push — GitHub Actions builds platform artifacts.
 4. Attach or verify release assets on GitHub Releases.
 
 ## Contributing
 
-Bug reports and pull requests welcome on [GitHub](https://github.com/e-vicius/steppy). See [CONTRIBUTING.md](https://github.com/e-vicius/steppy/blob/main/CONTRIBUTING.md).
+Bug reports and pull requests welcome on [GitHub](https://github.com/e-vicius/steppy-desktop). See [CONTRIBUTING.md](https://github.com/e-vicius/steppy-desktop/blob/main/CONTRIBUTING.md).
 
 Licence: MIT.

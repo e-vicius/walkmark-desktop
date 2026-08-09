@@ -17,34 +17,35 @@ Steppy is a native desktop app. You pick a screen or window, do the task, and it
 </p>
 
 **Website:** [steppy.app](https://steppy.app) · **Docs:** [steppy.app/docs](https://steppy.app/docs)  
-**Download:** [Latest release](https://github.com/e-vicius/steppy/releases/latest)  
+**Download:** [Latest release](https://github.com/e-vicius/steppy-desktop/releases/latest)  
 **Marketing site source:** [steppy-landing](https://github.com/e-vicius/steppy-landing)
 
 ## Download
 
 | Platform | Install |
 | --- | --- |
-| **macOS** (Apple Silicon) | [`.dmg` aarch64](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_aarch64.dmg) |
-| **macOS** (Intel) | [`.dmg` x64](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_x64.dmg) |
-| **Windows** (x64) | [`.exe` installer](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_x64-setup.exe) |
-| **Windows** (ARM64) | [`.exe` installer](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_arm64-setup.exe) |
-| **Linux** | [AppImage](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_amd64.AppImage) · [`.deb`](https://github.com/e-vicius/steppy/releases/latest/download/steppy_0.1.1_amd64.deb) |
+| **macOS** (Apple Silicon) | [`.dmg` aarch64](https://github.com/e-vicius/steppy-desktop/releases/latest/download/Steppy_0.1.1_aarch64.dmg) |
+| **macOS** (Intel) | [`.dmg` x64](https://github.com/e-vicius/steppy-desktop/releases/latest/download/Steppy_0.1.1_x64.dmg) |
+| **Windows** (x64) | [`.exe` installer](https://github.com/e-vicius/steppy-desktop/releases/latest/download/Steppy_0.1.1_x64-setup.exe) |
+| **Windows** (ARM64) | [`.exe` installer](https://github.com/e-vicius/steppy-desktop/releases/latest/download/Steppy_0.1.1_arm64-setup.exe) |
+| **Linux** | [AppImage](https://github.com/e-vicius/steppy-desktop/releases/latest/download/Steppy_0.1.1_amd64.AppImage) · [`.deb`](https://github.com/e-vicius/steppy-desktop/releases/latest/download/steppy_0.1.1_amd64.deb) |
 
-Asset names match tag `v0.1.1`. See [all releases](https://github.com/e-vicius/steppy/releases) if a newer version is available.
+Asset names match tag `v0.1.1`. See [all releases](https://github.com/e-vicius/steppy-desktop/releases) if a newer version is available.
 
 Requires macOS 11+, Windows 10+, or a recent Linux desktop with screen capture.
 
 ## Open source vs Cloud
 
-| | **Steppy (this repo)** | **Steppy Cloud** |
+| | **Open source (this repo)** | **Steppy Cloud** |
 | --- | --- | --- |
-| Price | Free, MIT licence | $7/month |
-| AI models | Local (Ollama, LM Studio) or bring your own cloud keys | We run the models for you |
-| Usage limits | Your provider's limits | Unlimited writing in the app |
-| Accounts | None | Sign in inside the app |
-| Extra features | Community driven | Sharable links and more shipping soon |
+| Status | Available now on [GitHub](https://github.com/e-vicius/steppy-desktop) | [Waitlist](https://steppy.app/#cloud) — not open yet |
+| Price | Free, MIT licence — no subscription | Pricing at launch |
+| AI writing | Ollama or LM Studio on your machine, or bring your own API keys | Hosted models in the same desktop app — no API keys |
+| Your data | Recording, editing, and export stay on your computer | Sharable guide links when Cloud launches |
+| Account | None required | Sign in when Cloud launches |
+| Enterprise | — | SSO, audit logs, on-prem — [hello@steppy.app](mailto:hello@steppy.app?subject=Steppy%20Enterprise) |
 
-Enterprise teams: [contact us](mailto:hello@steppy.app).
+The open source app is fully usable without Cloud: projects and screenshots stay on disk, recording and export work offline, and your keys never pass through our servers when you write with a local model or your own provider.
 
 ## How it works
 
@@ -68,7 +69,7 @@ Full guides at [steppy.app/docs](https://steppy.app/docs) or in [`docs/`](docs/R
 ## Build from source
 
 ```bash
-git clone https://github.com/e-vicius/steppy.git
+git clone https://github.com/e-vicius/steppy-desktop.git
 cd steppy
 pnpm install
 pnpm tauri dev      # development

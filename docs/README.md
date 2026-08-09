@@ -23,10 +23,10 @@ Guides for the open source desktop app. The same docs are published at [steppy.a
 | --- | --- |
 | [Build from source](build-from-source.md) | Prerequisites, dev run, release builds |
 | [Architecture](architecture.md) | Tauri layout, modules, IPC, data flow |
-| [Contributing](https://github.com/e-vicius/steppy/blob/main/CONTRIBUTING.md) | PRs, tests, code style |
+| [Contributing](https://github.com/e-vicius/steppy-desktop/blob/main/CONTRIBUTING.md) | PRs, tests, code style |
 
 ## Quick links
 
-- [Download latest release](https://github.com/e-vicius/steppy/releases/latest)
-- [Report an issue](https://github.com/e-vicius/steppy/issues)
-- [Steppy Cloud](https://github.com/e-vicius/steppy/blob/main/README.md#open-source-vs-cloud) (coming soon)
+- [Download latest release](https://github.com/e-vicius/steppy-desktop/releases/latest)
+- [Report an issue](https://github.com/e-vicius/steppy-desktop/issues)
+- [Steppy Cloud](https://github.com/e-vicius/steppy-desktop/blob/main/README.md#open-source-vs-cloud) (coming soon)

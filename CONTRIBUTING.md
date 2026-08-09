@@ -4,7 +4,7 @@ Thanks for helping improve Steppy.
 
 ## Before you start
 
-- Search [existing issues](https://github.com/e-vicius/steppy/issues) so work is not duplicated.
+- Search [existing issues](https://github.com/e-vicius/steppy-desktop/issues) so work is not duplicated.
 - For large features, open an issue first to discuss approach.
 - Bug reports should include OS version, Steppy version, and steps to reproduce.
 
@@ -13,7 +13,7 @@ Thanks for helping improve Steppy.
 See [docs/build-from-source.md](docs/build-from-source.md).
 
 ```bash
-git clone https://github.com/e-vicius/steppy.git
+git clone https://github.com/e-vicius/steppy-desktop.git
 cd steppy
 pnpm install
 pnpm tauri dev

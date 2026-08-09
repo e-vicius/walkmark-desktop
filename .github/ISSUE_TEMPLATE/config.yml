@@ -4,5 +4,5 @@ contact_links:
     url: https://steppy.app/docs
     about: Guides for install, recording, AI writing, and export
   - name: Security issue
-    url: https://github.com/e-vicius/steppy/security/advisories/new
+    url: https://github.com/e-vicius/steppy-desktop/security/advisories/new
     about: Report a vulnerability privately (do not open a public issue)

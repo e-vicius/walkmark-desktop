@@ -42,7 +42,7 @@ Artifacts land in `src-tauri/target/release/bundle/`:
 
 ## 5. Verify downloads
 
-Open the [latest release](https://github.com/e-vicius/steppy/releases/latest) and confirm filenames match `src/lib/downloads.ts` on the landing site.
+Open the [latest release](https://github.com/e-vicius/steppy-desktop/releases/latest) and confirm filenames match `src/lib/downloads.ts` on the landing site.
 
 ## Code signing (optional)
 

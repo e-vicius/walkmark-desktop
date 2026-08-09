@@ -4,7 +4,7 @@ Steppy turns a workflow you perform once into step-by-step documentation someone
 
 ## Install
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/e-vicius/steppy/releases/latest):
+Download the latest release for your platform from [GitHub Releases](https://github.com/e-vicius/steppy-desktop/releases/latest):
 
 | Platform | File | Notes |
 | --- | --- | --- |

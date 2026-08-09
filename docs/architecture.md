@@ -116,4 +116,4 @@ cargo test --manifest-path src-tauri/Cargo.toml
 ## Related
 
 - [Build from source](build-from-source.md)
-- [Contributing](https://github.com/e-vicius/steppy/blob/main/CONTRIBUTING.md)
+- [Contributing](https://github.com/e-vicius/steppy-desktop/blob/main/CONTRIBUTING.md)

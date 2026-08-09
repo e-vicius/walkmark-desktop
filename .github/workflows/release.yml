@@ -74,7 +74,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: Steppy v__VERSION__
           releaseBody: |
-            See [documentation](https://github.com/e-vicius/steppy/tree/main/docs) for install notes.
+            See [documentation](https://github.com/e-vicius/steppy-desktop/tree/main/docs) for install notes.
 
             | Platform | File |
             | --- | --- |
