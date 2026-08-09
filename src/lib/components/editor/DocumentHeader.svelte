@@ -2,6 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { pluralize, relativeTime } from '$lib/format';
 	import { productLabel } from '$lib/products';
+	import { languageShortLabel } from '$lib/languages';
 	import { store } from '$lib/store.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
@@ -15,6 +16,7 @@
 		project.steps.filter((s) => s.include && s.status === 'ready').length
 	);
 	const product = $derived(productLabel(store.settings, project.productId));
+	const language = $derived(languageShortLabel(project.language || store.settings.language));
 
 	// Title field
 	let titleDraft = $state('');
@@ -76,6 +78,8 @@
 			<span aria-hidden="true">·</span>
 		{/if}
 		<span>{relativeTime(project.updatedAt)}</span>
+		<span aria-hidden="true">·</span>
+		<span>{language}</span>
 		{#if included > 0 && !recording}
 			<span aria-hidden="true">·</span>
 			<span class={cn(written < included && 'text-amber-600 dark:text-amber-400')}>

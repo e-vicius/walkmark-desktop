@@ -110,6 +110,7 @@ export const updateProjectMeta = (meta: {
   title?: string;
   summary?: string;
   prerequisites?: string[];
+  language?: string;
 }) => call<Project>("update_project_meta", { meta });
 
 const framePathCache = new Map<string, string>();
@@ -154,6 +155,7 @@ export type GenerateScope = "missing" | "all" | "only";
 export interface GenerationRequest {
   provider?: ProviderId;
   model?: string;
+  language?: string;
 }
 
 export const generate = (
@@ -166,6 +168,7 @@ export const generate = (
     ids,
     provider: request.provider ?? null,
     model: request.model ?? null,
+    language: request.language ?? null,
   });
 export const cancelGeneration = () => call<void>("cancel_generation");
 

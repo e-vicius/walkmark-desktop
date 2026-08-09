@@ -4098,6 +4098,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "winapi",
+ "x11",
 ]
 
 [[package]]
@@ -4826,7 +4827,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "steppy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64 0.22.1",
  "chrono",

@@ -1,6 +1,6 @@
 [package]
 name = "steppy"
-version = "0.1.0"
+version = "0.1.1"
 description = "Turn any workflow into polished step-by-step documentation"
 authors = ["Steppy"]
 edition = "2021"

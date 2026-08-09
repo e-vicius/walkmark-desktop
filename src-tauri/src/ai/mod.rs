@@ -67,6 +67,27 @@ pub enum Scope {
 pub struct GenerationOverrides {
     pub provider: Option<crate::models::Provider>,
     pub model: Option<String>,
+    pub language: Option<String>,
+}
+
+fn effective_settings(
+    settings: &Settings,
+    project: &Project,
+    overrides: &GenerationOverrides,
+) -> Settings {
+    let mut effective = settings.clone();
+    if let Some(language) = overrides
+        .language
+        .as_ref()
+        .map(|l| crate::limits::clamp_trim(l, crate::limits::LANGUAGE))
+        .filter(|l| !l.is_empty())
+    {
+        effective.language = language;
+    } else if !project.language.trim().is_empty() {
+        effective.language =
+            crate::limits::clamp(&project.language, crate::limits::LANGUAGE);
+    }
+    effective
 }
 
 /// Builds a client from whatever the user has configured, so no caller needs to
@@ -108,6 +129,8 @@ pub async fn run(
         .lock()
         .clone()
         .ok_or_else(|| AppError::NotFound("No document is open.".into()))?;
+
+    let settings = effective_settings(&settings, &project, &overrides);
 
     let targets = select_targets(&project, &scope);
     if targets.is_empty() {

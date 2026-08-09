@@ -4,6 +4,7 @@
 	import { store } from "$lib/store.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import WriteModelSelect from "$lib/components/WriteModelSelect.svelte";
+	import WriteLanguageSelect from "$lib/components/WriteLanguageSelect.svelte";
 
 	const project = $derived(store.project);
 	const missing = $derived(
@@ -16,6 +17,7 @@
 
 {#if project}
 	<div class="flex items-center gap-1">
+		<WriteLanguageSelect disabled={busy} />
 		<WriteModelSelect disabled={busy} />
 		<Button
 			size="sm"

@@ -4,8 +4,10 @@
 	import { convertFileSrc } from "@tauri-apps/api/core";
 	import { store } from "$lib/store.svelte";
 	import { pluralize, relativeTime } from "$lib/format";
+	import { LIMITS } from "$lib/limits";
 	import { Button } from "$lib/components/ui/button";
 	import { Badge } from "$lib/components/ui/badge";
+	import { Input } from "$lib/components/ui/input";
 	import {
 		Dialog,
 		DialogContent,
@@ -24,8 +26,41 @@
 	import LibrarySkeleton from "$lib/components/skeletons/LibrarySkeleton.svelte";
 	import type { ProjectSummary } from "$lib/types";
 
+	const PAGE_SIZE = 12;
+
 	let deleteTarget = $state<ProjectSummary | null>(null);
 	let deleting = $state(false);
+	let query = $state("");
+	let page = $state(1);
+
+	const filtered = $derived(
+		store.projects.filter((project) => {
+			const needle = query.trim().toLowerCase();
+			if (!needle) return true;
+			return project.title.toLowerCase().includes(needle);
+		}),
+	);
+
+	const totalPages = $derived(Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)));
+
+	const pageItems = $derived(
+		filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+	);
+
+	const rangeStart = $derived(
+		filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1,
+	);
+
+	const rangeEnd = $derived(Math.min(page * PAGE_SIZE, filtered.length));
+
+	$effect(() => {
+		query;
+		page = 1;
+	});
+
+	$effect(() => {
+		if (page > totalPages) page = totalPages;
+	});
 
 	onMount(() => {
 		void store.refreshProjects();
@@ -67,14 +102,97 @@
 		{:else}
 			{@render notices("mb-8")}
 			<section>
-				<h2 class="mb-4 text-xs font-medium uppercase tracking-wider text-(--text)/40">
-					Your documents
-				</h2>
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{#each store.projects as project (project.id)}
-						{@render card(project)}
-					{/each}
+				<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<h2 class="text-xs font-medium uppercase tracking-wider text-(--text)/40">
+						Your documents
+					</h2>
+					<div class="flex w-full flex-col gap-2 sm:max-w-sm sm:flex-row sm:items-center">
+						<div class="relative min-w-0 flex-1">
+							<Icon
+								icon="lucide:search"
+								class="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text)/40"
+							/>
+							<Input
+								bind:value={query}
+								maxlength={LIMITS.searchQuery}
+								placeholder="Search documents"
+								class="pl-9"
+							/>
+						</div>
+						{#if query.trim()}
+							<Button
+								variant="ghost"
+								size="sm"
+								class="shrink-0"
+								onclick={() => (query = "")}
+							>
+								Clear
+							</Button>
+						{/if}
+					</div>
 				</div>
+
+				{#if filtered.length === 0}
+					<div class="rounded-3xl bg-(--bg-elevated) px-6 py-14 text-center">
+						<Icon icon="lucide:search-x" class="mx-auto mb-3 size-6 text-(--text)/32" />
+						<p class="text-sm font-medium text-(--text)">No documents match your search</p>
+						<p class="mt-1 text-xs text-(--text)/56">
+							Nothing titled like “{query.trim()}”. Try a different phrase.
+						</p>
+						<Button variant="ghost" size="sm" class="mt-4" onclick={() => (query = "")}>
+							Clear search
+						</Button>
+					</div>
+				{:else}
+					<p class="mb-4 text-xs text-(--text)/56">
+						{filtered.length === store.projects.length
+							? pluralize(filtered.length, "document")
+							: `${filtered.length} of ${pluralize(store.projects.length, "document")}`}
+						{#if totalPages > 1}
+							<span aria-hidden="true"> · </span>
+							<span>Page {page} of {totalPages}</span>
+						{/if}
+					</p>
+
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{#each pageItems as project (project.id)}
+							{@render card(project)}
+						{/each}
+					</div>
+
+					{#if totalPages > 1}
+						<div
+							class="mt-8 flex flex-col items-center justify-between gap-3 border-t border-(--text)/8 pt-6 sm:flex-row"
+						>
+							<p class="text-xs text-(--text)/56">
+								Showing {rangeStart}–{rangeEnd} of {filtered.length}
+							</p>
+							<div class="flex items-center gap-2">
+								<Button
+									variant="ghost"
+									size="sm"
+									disabled={page <= 1}
+									onclick={() => (page -= 1)}
+								>
+									<Icon icon="lucide:chevron-left" class="size-4" />
+									Previous
+								</Button>
+								<span class="min-w-[5.5rem] text-center text-xs tabular-nums text-(--text)/56">
+									{page} / {totalPages}
+								</span>
+								<Button
+									variant="ghost"
+									size="sm"
+									disabled={page >= totalPages}
+									onclick={() => (page += 1)}
+								>
+									Next
+									<Icon icon="lucide:chevron-right" class="size-4" />
+								</Button>
+							</div>
+						</div>
+					{/if}
+				{/if}
 			</section>
 		{/if}
 	</div>

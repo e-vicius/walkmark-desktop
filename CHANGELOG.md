@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — 2026-08-09
+
+- Per-document language picker for AI writing, with expanded preset languages
+- Library search and pagination on the documents screen
+- Document language saved when starting a recording
+
 ## 0.1.0 — 2026-08-08
 
 First public open source release.

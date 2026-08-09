@@ -8,9 +8,21 @@ export const DOCUMENT_LANGUAGES = [
 	"Italian",
 	"Dutch",
 	"Polish",
+	"Russian",
+	"Ukrainian",
+	"Turkish",
+	"Arabic",
+	"Hindi",
 	"Japanese",
 	"Korean",
 	"Lithuanian",
+	"Swedish",
+	"Czech",
+	"Romanian",
+	"Vietnamese",
+	"Indonesian",
+	"Greek",
+	"Hebrew",
 	"Chinese (Simplified)",
 	"Chinese (Traditional)",
 ] as const;
@@ -40,4 +52,13 @@ export function languageSelectLabel(language: string): string {
 
 export function languageOptions(): string[] {
 	return [...DOCUMENT_LANGUAGES, OTHER_LANGUAGE];
+}
+
+/** Short label for compact UI (e.g. top bar). */
+export function languageShortLabel(language: string): string {
+	const trimmed = language.trim();
+	if (!trimmed) return "English";
+	if (trimmed === "Chinese (Simplified)") return "Chinese (简)";
+	if (trimmed === "Chinese (Traditional)") return "Chinese (繁)";
+	return trimmed;
 }

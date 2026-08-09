@@ -65,6 +65,8 @@ export interface Project {
   sourceLabel: string;
   /** Vocabulary profile used when writing this guide. */
   productId?: string | null;
+  /** Language the AI should write this document in. */
+  language: string;
   steps: Step[];
 }
 

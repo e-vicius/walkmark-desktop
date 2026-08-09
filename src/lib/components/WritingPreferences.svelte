@@ -23,8 +23,8 @@
 
 <div class="space-y-6">
 	<p class="text-sm text-(--text)/56">
-		Default voice and audience for new recordings. Vocabulary is grouped by product — Steppy
-		uses it when writing step instructions.
+		Default voice, audience, and language for new recordings. Change the writing language per
+		document from the editor toolbar. Vocabulary is grouped by product.
 	</p>
 
 	<div class="space-y-1.5">

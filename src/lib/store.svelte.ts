@@ -79,6 +79,7 @@ class AppStore {
   /** Provider/model picked for the next Write run — may differ from Settings. */
   writeProvider = $state<ProviderId>("gemini");
   writeModel = $state("");
+  writeLanguage = $state("English");
 
   get activeProvider(): ProviderInfo | undefined {
     return this.catalog.providers.find((p) => p.id === this.settings.provider);
@@ -163,6 +164,7 @@ class AppStore {
   }
 
   syncWriteSelection() {
+    this.syncWriteLanguage();
     const fallback = this.writeOptions[0];
     if (!fallback) {
       this.writeProvider = this.settings.provider;
@@ -188,6 +190,22 @@ class AppStore {
   selectWriteModel(provider: ProviderId, model: string) {
     this.writeProvider = provider;
     this.writeModel = model;
+  }
+
+  syncWriteLanguage() {
+    const lang =
+      this.project?.language?.trim() ||
+      this.settings.language.trim() ||
+      "English";
+    this.writeLanguage = lang;
+  }
+
+  async selectWriteLanguage(language: string) {
+    const trimmed = language.trim() || "English";
+    this.writeLanguage = trimmed;
+    if (this.project && this.project.language !== trimmed) {
+      await this.patchMeta({ language: trimmed });
+    }
   }
 
   get blockedReason(): string | null {
@@ -428,6 +446,7 @@ class AppStore {
     title?: string;
     summary?: string;
     prerequisites?: string[];
+    language?: string;
   }) {
     const current = this.project;
     if (!current) return;
@@ -650,6 +669,7 @@ class AppStore {
       await api.generate(scope, ids, {
         provider: this.writeProvider,
         model: this.writeModel,
+        language: this.writeLanguage,
       });
     } catch (error) {
       this.generation = null;

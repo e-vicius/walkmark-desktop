@@ -62,4 +62,8 @@
 	</div>
 
 	<LanguageSelect bind:value={language} />
+	<p class="text-xs text-(--text)/56">
+		Step instructions will be written in this language. You can change it later from the editor
+		toolbar.
+	</p>
 </div>

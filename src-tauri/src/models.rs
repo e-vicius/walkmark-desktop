@@ -285,6 +285,10 @@ impl Product {
 // Project
 // ---------------------------------------------------------------------------
 
+fn default_language() -> String {
+    "English".into()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Project {
@@ -301,6 +305,9 @@ pub struct Project {
     /// Which product vocabulary applies to this guide.
     #[serde(default)]
     pub product_id: Option<String>,
+    /// Language used when AI writes this document.
+    #[serde(default = "default_language")]
+    pub language: String,
     #[serde(default)]
     pub steps: Vec<Step>,
 }
@@ -316,6 +323,7 @@ impl Project {
             updated_at: now(),
             source_label: source_label.into(),
             product_id: None,
+            language: default_language(),
             steps: Vec::new(),
         }
     }

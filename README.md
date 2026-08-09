@@ -24,13 +24,13 @@ Steppy is a native desktop app. You pick a screen or window, do the task, and it
 
 | Platform | Install |
 | --- | --- |
-| **macOS** (Apple Silicon) | [`.dmg` aarch64](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.0_aarch64.dmg) |
-| **macOS** (Intel) | [`.dmg` x64](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.0_x64.dmg) |
-| **Windows** (x64) | [`.exe` installer](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.0_x64-setup.exe) |
-| **Windows** (ARM64) | [`.exe` installer](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.0_arm64-setup.exe) |
-| **Linux** | [AppImage](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.0_amd64.AppImage) · [`.deb`](https://github.com/e-vicius/steppy/releases/latest/download/steppy_0.1.0_amd64.deb) |
+| **macOS** (Apple Silicon) | [`.dmg` aarch64](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_aarch64.dmg) |
+| **macOS** (Intel) | [`.dmg` x64](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_x64.dmg) |
+| **Windows** (x64) | [`.exe` installer](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_x64-setup.exe) |
+| **Windows** (ARM64) | [`.exe` installer](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_arm64-setup.exe) |
+| **Linux** | [AppImage](https://github.com/e-vicius/steppy/releases/latest/download/Steppy_0.1.1_amd64.AppImage) · [`.deb`](https://github.com/e-vicius/steppy/releases/latest/download/steppy_0.1.1_amd64.deb) |
 
-Asset names match tag `v0.1.0`. See [all releases](https://github.com/e-vicius/steppy/releases) if a newer version is available.
+Asset names match tag `v0.1.1`. See [all releases](https://github.com/e-vicius/steppy/releases) if a newer version is available.
 
 Requires macOS 11+, Windows 10+, or a recent Linux desktop with screen capture.
 

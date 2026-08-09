@@ -291,6 +291,7 @@ pub fn start_recording(
 
     let mut project = Project::new("Untitled guide", "");
     project.product_id = product_id;
+    project.language = settings.language.clone();
     let frames_dir = storage::frames_dir(&app, &project.id)?;
 
     let session = Session::start(
@@ -438,6 +439,7 @@ pub struct ProjectMeta {
     pub title: Option<String>,
     pub summary: Option<String>,
     pub prerequisites: Option<Vec<String>>,
+    pub language: Option<String>,
 }
 
 #[tauri::command]
@@ -469,6 +471,9 @@ pub fn update_project_meta(
             .filter(|p| !p.is_empty())
             .take(limits::PREREQUISITES_MAX)
             .collect();
+    }
+    if let Some(language) = meta.language {
+        project.language = limits::clamp_trim(&language, limits::LANGUAGE);
     }
     project.touch();
     storage::save_project(&app, project)?;
@@ -666,6 +671,7 @@ pub fn generate(
     ids: Vec<String>,
     provider: Option<String>,
     model: Option<String>,
+    language: Option<String>,
 ) -> Result<()> {
     if state.is_generating() {
         return Err(AppError::Invalid("A run is already in progress.".into()));
@@ -705,6 +711,7 @@ menu — for Mistral, use Small or Large."
     let overrides = ai::GenerationOverrides {
         provider: provider.as_deref().and_then(Provider::parse),
         model,
+        language,
     };
 
     let cancel = Arc::new(AtomicBool::new(false));
