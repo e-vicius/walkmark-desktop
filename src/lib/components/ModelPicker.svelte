@@ -59,14 +59,7 @@
 			</SelectTrigger>
 			<SelectContent>
 				{#each store.catalog.providers as p (p.id)}
-					<SelectItem value={p.id} label={p.name}>
-						<span class="flex items-center gap-2">
-							<span>{p.name}</span>
-							{#if store.catalog.configured.includes(p.id)}
-								<Badge class="py-0">Ready</Badge>
-							{/if}
-						</span>
-					</SelectItem>
+					<SelectItem value={p.id} label={p.name}>{p.name}</SelectItem>
 				{/each}
 			</SelectContent>
 		</Select>
