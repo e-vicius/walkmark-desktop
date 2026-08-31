@@ -72,7 +72,7 @@ The open source app does not include analytics or crash reporting today. If that
 
 ## Enterprise
 
-Teams with SSO, audit logs, or on-prem deployment requirements can [contact us](mailto:ernestas.jucevicius@kyo.lt).
+Teams with SSO, audit logs, or on-prem deployment requirements can [contact us](mailto:hello@walkmark.app).
 
 ## Related
 
