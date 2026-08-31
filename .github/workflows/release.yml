@@ -72,17 +72,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: v__VERSION__
-          releaseName: Steppy v__VERSION__
+          releaseName: Walkmark v__VERSION__
           releaseBody: |
-            See [documentation](https://github.com/e-vicius/steppy-desktop/tree/main/docs) for install notes.
+            See [documentation](https://github.com/e-vicius/walkmark-desktop/tree/main/docs) for install notes.
 
             | Platform | File |
             | --- | --- |
-            | macOS (Apple Silicon) | `Steppy_*_aarch64.dmg` |
-            | macOS (Intel) | `Steppy_*_x64.dmg` |
-            | Windows (x64) | `Steppy_*_x64-setup.exe` |
-            | Windows (ARM64) | `Steppy_*_arm64-setup.exe` |
-            | Linux | `Steppy_*_amd64.AppImage` or `.deb` |
+            | macOS (Apple Silicon) | `Walkmark_*_aarch64.dmg` |
+            | macOS (Intel) | `Walkmark_*_x64.dmg` |
+            | Windows (x64) | `Walkmark_*_x64-setup.exe` |
+            | Windows (ARM64) | `Walkmark_*_arm64-setup.exe` |
+            | Linux | `Walkmark_*_amd64.AppImage` or `.deb` |
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
