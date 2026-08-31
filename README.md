@@ -43,7 +43,7 @@ Requires macOS 11+, Windows 10+, or a recent Linux desktop with screen capture.
 | AI writing | Ollama or LM Studio on your machine, or bring your own API keys | Hosted models in the same desktop app — no API keys |
 | Your data | Recording, editing, and export stay on your computer | Sharable guide links when Cloud launches |
 | Account | None required | Sign in when Cloud launches |
-| Enterprise | — | SSO, audit logs, on-prem — [hello@walkmark.app](mailto:hello@walkmark.app?subject=Walkmark%20Enterprise) |
+| Enterprise | — | SSO, audit logs, on-prem — [ernestas.jucevicius@kyo.lt](mailto:ernestas.jucevicius@kyo.lt?subject=Walkmark%20Enterprise) |
 
 The open source app is fully usable without Cloud: projects and screenshots stay on disk, recording and export work offline, and your keys never pass through our servers when you write with a local model or your own provider.
 

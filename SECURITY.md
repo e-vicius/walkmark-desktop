@@ -12,7 +12,7 @@
 **Please do not open a public GitHub issue for security problems.**
 
 1. Use [GitHub private vulnerability reporting](https://github.com/e-vicius/walkmark-desktop/security/advisories/new), or
-2. Email **hello@walkmark.app** with steps to reproduce, impact, and affected versions.
+2. Email **ernestas.jucevicius@kyo.lt** with steps to reproduce, impact, and affected versions.
 
 We aim to acknowledge reports within a few business days and will coordinate disclosure once a fix is ready.
 
