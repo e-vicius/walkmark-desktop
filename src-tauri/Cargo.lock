@@ -4827,36 +4827,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
-name = "steppy"
-version = "0.1.1"
-dependencies = [
- "base64 0.23.1",
- "chrono",
- "dirs",
- "image",
- "keyring",
- "libc",
- "parking_lot",
- "printpdf",
- "pulldown-cmark",
- "rayon",
- "rdev",
- "reqwest",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-opener",
- "thiserror 2.0.19",
- "tokio",
- "uuid",
- "xcap",
-]
-
-[[package]]
 name = "string_cache"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6038,6 +6008,36 @@ checksum = "29790946404f91d9c5d06f9874efddea1dc06c5efe94541a7d6863108e3a5e4b"
 dependencies = [
  "same-file",
  "winapi-util",
+]
+
+[[package]]
+name = "walkmark"
+version = "0.1.1"
+dependencies = [
+ "base64 0.23.1",
+ "chrono",
+ "dirs",
+ "image",
+ "keyring",
+ "libc",
+ "parking_lot",
+ "printpdf",
+ "pulldown-cmark",
+ "rayon",
+ "rdev",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-opener",
+ "thiserror 2.0.19",
+ "tokio",
+ "uuid",
+ "xcap",
 ]
 
 [[package]]

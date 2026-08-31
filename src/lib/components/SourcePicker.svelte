@@ -112,7 +112,7 @@
 		} catch (error) {
 			if (requestToken !== token) return;
 			sources = [];
-			store.reportError(error, 'Steppy could not list your screens');
+			store.reportError(error, 'Walkmark could not list your screens');
 		} finally {
 			if (requestToken === token) previewsPending = false;
 		}
@@ -135,7 +135,7 @@
 					Say who this guide is for. Pick a product if you want its vocabulary applied.
 				</DialogDescription>
 			{:else}
-				<DialogTitle>What should Steppy watch?</DialogTitle>
+				<DialogTitle>What should Walkmark watch?</DialogTitle>
 				<DialogDescription>
 					Pick a whole screen, or a single window to keep everything else out of your document.
 				</DialogDescription>
@@ -147,7 +147,7 @@
 				<Icon icon="lucide:monitor" class="mb-4 size-7 text-(--text)/40" />
 				<h3 class="text-[15px] font-semibold">macOS hasn't granted screen access</h3>
 				<p class="mt-1.5 max-w-sm text-[13px] leading-relaxed text-(--text)/56">
-					Until you allow it, Steppy can list your screens but cannot capture what is on them.
+					Until you allow it, Walkmark can list your screens but cannot capture what is on them.
 				</p>
 				<Button class="mt-6" onclick={() => store.setDialog('onboarding')}>Show me how</Button>
 			</div>
@@ -272,8 +272,8 @@
 
 			<p class="mt-4 shrink-0 border-t border-(--text)/8 pt-3 text-[12px] leading-relaxed text-(--text)/56">
 				{settings.capture.hideWindow
-					? 'Steppy will step out of the way and leave a small floating controller on screen.'
-					: 'Steppy will stay open. Its own window is never offered as a capture source.'}
+					? 'Walkmark will step out of the way and leave a small floating controller on screen.'
+					: 'Walkmark will stay open. Its own window is never offered as a capture source.'}
 			</p>
 
 			<DialogFooter class="mt-4 shrink-0 sm:justify-between">

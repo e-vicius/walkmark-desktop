@@ -1,1 +1,1 @@
-export const APP_NAME = "Steppy";
+export const APP_NAME = "Walkmark";

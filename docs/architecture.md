@@ -1,6 +1,6 @@
 # Architecture
 
-Steppy is a **Tauri 2** desktop app: a **Svelte 5** frontend and a **Rust** backend in one process. Screen capture, AI calls, and file I/O run in Rust; the UI talks to Rust through Tauri **commands** and **events**.
+Walkmark is a **Tauri 2** desktop app: a **Svelte 5** frontend and a **Rust** backend in one process. Screen capture, AI calls, and file I/O run in Rust; the UI talks to Rust through Tauri **commands** and **events**.
 
 ## High-level flow
 
@@ -89,7 +89,7 @@ Prompts live in `ai/prompt.rs`. Provider-specific HTTP in `ai/provider/*.rs`.
 
 - **CSP** in `tauri.conf.json` limits network to provider API hosts + local Ollama.
 - **Asset protocol** serves frame PNGs only from `$APPDATA/**`.
-- API keys stored in app data credentials files and OS keychain (`app.steppy`); never uploaded to Steppy servers.
+- API keys stored in app data credentials files and OS keychain (`app.walkmark`); never uploaded to Walkmark servers.
 
 ## Adding a provider
 
@@ -116,4 +116,4 @@ cargo test --manifest-path src-tauri/Cargo.toml
 ## Related
 
 - [Build from source](build-from-source.md)
-- [Contributing](https://github.com/e-vicius/steppy-desktop/blob/main/CONTRIBUTING.md)
+- [Contributing](https://github.com/e-vicius/walkmark-desktop/blob/main/CONTRIBUTING.md)

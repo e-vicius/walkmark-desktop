@@ -43,7 +43,7 @@ pub fn ensure_listener() -> bool {
         let worker_triggered = Arc::clone(&triggered);
 
         let handle = thread::Builder::new()
-            .name("steppy-input".into())
+            .name("walkmark-input".into())
             .spawn(move || {
                 // rdev defaults to "main thread" mode; Tauri's listener runs on a
                 // worker thread and will segfault on keypress without this (macOS).
@@ -56,17 +56,17 @@ pub fn ensure_listener() -> bool {
                     }))
                     .is_err()
                     {
-                        eprintln!("steppy input listener dropped an event after a panic");
+                        eprintln!("walkmark input listener dropped an event after a panic");
                     }
                 }) {
-                    eprintln!("steppy input listener stopped: {error:?}");
+                    eprintln!("walkmark input listener stopped: {error:?}");
                 }
             });
 
         let handle = match handle {
             Ok(handle) => handle,
             Err(error) => {
-                eprintln!("steppy input listener could not start: {error}");
+                eprintln!("walkmark input listener could not start: {error}");
                 return Listener {
                     enabled,
                     triggered,
@@ -164,7 +164,7 @@ fn event_triggers_step(event: &Event) -> bool {
             EventType::Wheel { delta_x, delta_y } => delta_x != 0 || delta_y != 0,
             EventType::KeyPress(key) => {
                 mods.on_press(key);
-                if mods.is_steppy_shortcut(key) || is_modifier(key) {
+                if mods.is_walkmark_shortcut(key) || is_modifier(key) {
                     false
                 } else {
                     true
@@ -196,7 +196,7 @@ impl ModifierState {
         }
     }
 
-    fn is_steppy_shortcut(&self, key: Key) -> bool {
+    fn is_walkmark_shortcut(&self, key: Key) -> bool {
         self.shift
             && self.alt
             && matches!(key, Key::KeyS | Key::KeyM | Key::KeyP)
@@ -226,7 +226,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn steppy_shortcuts_are_ignored() {
+    fn walkmark_shortcuts_are_ignored() {
         MODIFIERS.with(|mods| {
             *mods.borrow_mut() = ModifierState {
                 shift: true,

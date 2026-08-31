@@ -91,7 +91,7 @@ impl Session {
         let (ready_tx, ready_rx) = mpsc::channel::<Result<String>>();
         let worker_ctl = Arc::clone(&ctl);
         let handle = thread::Builder::new()
-            .name("steppy-capture".into())
+            .name("walkmark-capture".into())
             .spawn(move || run(app, cfg, worker_ctl, ready_tx))
             .map_err(|e| AppError::Other(format!("Could not start the capture thread: {e}")))?;
 
@@ -215,7 +215,7 @@ fn run(
         let _ = app.emit(
             EVT_ERROR,
             ErrorEvent {
-                message: "Input monitoring is off — enable Accessibility for Steppy in System \
+                message: "Input monitoring is off — enable Accessibility for Walkmark in System \
 Settings, or turn on visual fallback in Recording settings."
                     .into(),
                 fatal: false,

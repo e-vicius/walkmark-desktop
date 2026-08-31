@@ -58,7 +58,7 @@
 							<div>
 								<p class="text-[15px] font-semibold">This document has no steps</p>
 								<p class="mt-1.5 max-w-sm text-[13px] leading-relaxed text-(--text)/56">
-									Record the workflow again — Steppy captures a step each time the screen
+									Record the workflow again — Walkmark captures a step each time the screen
 									changes meaningfully.
 								</p>
 							</div>

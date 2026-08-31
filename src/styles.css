@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Steppy's surfaces are numbered by elevation rather than named by colour, so a
+  Walkmark's surfaces are numbered by elevation rather than named by colour, so a
   component can say "sit one layer above your parent" and stay correct in both
   themes.
 */
@@ -167,7 +167,7 @@ textarea,
   -webkit-app-region: no-drag;
 }
 
-@keyframes steppy-fade-up {
+@keyframes walkmark-fade-up {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -177,7 +177,7 @@ textarea,
     transform: none;
   }
 }
-@keyframes steppy-fade {
+@keyframes walkmark-fade {
   from {
     opacity: 0;
   }
@@ -185,7 +185,7 @@ textarea,
     opacity: 1;
   }
 }
-@keyframes steppy-shimmer {
+@keyframes walkmark-shimmer {
   from {
     background-position: -180% 0;
   }
@@ -193,7 +193,7 @@ textarea,
     background-position: 180% 0;
   }
 }
-@keyframes steppy-pulse-ring {
+@keyframes walkmark-pulse-ring {
   0% {
     opacity: 0.55;
     transform: scale(0.86);
@@ -209,10 +209,10 @@ textarea,
 }
 
 @utility animate-fade-up {
-  animation: steppy-fade-up 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: walkmark-fade-up 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @utility animate-fade-in {
-  animation: steppy-fade 0.18s ease-out both;
+  animation: walkmark-fade 0.18s ease-out both;
 }
 
 /* Placeholder shown while a step is waiting on the model. */
@@ -224,7 +224,7 @@ textarea,
     var(--c-raised) 100%
   );
   background-size: 180% 100%;
-  animation: steppy-shimmer 1.6s linear infinite;
+  animation: walkmark-shimmer 1.6s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

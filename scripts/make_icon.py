@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the Steppy app icon.
+"""Render the Walkmark app icon.
 
 Kept as a script rather than a checked-in binary so the mark can be adjusted
 without a design tool. Produces a 1024x1024 PNG; run `pnpm tauri icon` on the

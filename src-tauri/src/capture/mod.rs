@@ -120,8 +120,8 @@ pub fn list_sources(with_thumbnails: bool) -> Result<Vec<CaptureSource>> {
         if title.trim().is_empty() && app.trim().is_empty() {
             continue;
         }
-        // Never offer Steppy's own windows — recording ourselves is a trap.
-        if app.eq_ignore_ascii_case("steppy") || app.eq_ignore_ascii_case("stepsy") {
+        // Never offer Walkmark's own windows — recording ourselves is a trap.
+        if app.eq_ignore_ascii_case("walkmark") {
             continue;
         }
         windows.push(CaptureSource {

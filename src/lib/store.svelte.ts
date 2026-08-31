@@ -253,7 +253,7 @@ class AppStore {
       this.applyTheme();
     } catch (error) {
       this.ready = true;
-      this.reportError(error, "Steppy could not start up cleanly");
+      this.reportError(error, "Walkmark could not start up cleanly");
     }
   }
 

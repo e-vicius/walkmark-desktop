@@ -88,7 +88,7 @@ Highlight and Cover support colour and stroke options in the toolbar.
 
 If a step fired too early or late, and **alternate** frames exist from the same recording, click **Different moment** on the screenshot. Pick the frame that best shows the step.
 
-Alternates are captured automatically when Steppy samples near the same timestamp — you do not manage them manually during recording.
+Alternates are captured automatically when Walkmark samples near the same timestamp — you do not manage them manually during recording.
 
 ## Toolbar actions
 

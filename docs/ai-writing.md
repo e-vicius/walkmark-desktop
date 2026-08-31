@@ -1,6 +1,6 @@
 # AI writing
 
-Steppy uses a **two-pass** approach so guides read as one coherent document, not isolated captions per screenshot.
+Walkmark uses a **two-pass** approach so guides read as one coherent document, not isolated captions per screenshot.
 
 ## Pass 1 — outline
 
@@ -55,11 +55,11 @@ Each suggested model in Settings shows a one-line note (speed vs quality). You c
 1. Open **Settings → Model**.
 2. Select a cloud provider.
 3. Follow the in-app **key guide** (link to the provider's console).
-4. Paste the key and save — Steppy **verifies** it with a test request before storing.
+4. Paste the key and save — Walkmark **verifies** it with a test request before storing.
 
-Keys are saved in your app data folder (`credentials.<provider>`) and mirrored to the OS secret store when available. Steppy never uploads keys to Steppy's servers.
+Keys are saved in your app data folder (`credentials.<provider>`) and mirrored to the OS secret store when available. Walkmark never uploads keys to Walkmark's servers.
 
-Remove a key by clearing the field and saving, or delete the credentials file while Steppy is quit.
+Remove a key by clearing the field and saving, or delete the credentials file while Walkmark is quit.
 
 ## Write scopes
 
@@ -90,9 +90,9 @@ Defaults in **Settings → Writing** (and the source picker before recording):
 - Lower if you hit rate limits or timeouts
 - Disabled for Ollama — local hardware writes sequentially
 
-## Steppy Cloud
+## Walkmark Cloud
 
-**Steppy Cloud** (coming soon) runs models for you with no API key — a separate opt-in plan. The open source app remains fully usable with BYOK or local models.
+**Walkmark Cloud** (coming soon) runs models for you with no API key — a separate opt-in plan. The open source app remains fully usable with BYOK or local models.
 
 ## Tips for better output
 

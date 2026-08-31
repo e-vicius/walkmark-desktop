@@ -22,7 +22,7 @@ Seven providers are built in:
 | On this Mac (Ollama) | No | Your machine — label is fixed in the app |
 | Custom endpoint | Optional | Your machine or LAN |
 
-Configured providers show a **Ready** badge. Cloud providers need a key pasted once; Steppy verifies it before saving. See [AI writing](ai-writing.md) and [Local models](local-models.md).
+Configured providers show a **Ready** badge. Cloud providers need a key pasted once; Walkmark verifies it before saving. See [AI writing](ai-writing.md) and [Local models](local-models.md).
 
 ### Concurrency
 
@@ -64,7 +64,7 @@ Set a **Default product** for new recordings. Vocabulary is injected into every 
 
 ## Recording
 
-Controls how Steppy decides when to capture a screenshot.
+Controls how Walkmark decides when to capture a screenshot.
 
 ### Minimum gap between steps
 
@@ -80,7 +80,7 @@ Seconds before recording begins (default **3**). Set to **None** (0) to start im
 
 ### Screen check interval
 
-How often Steppy compares frames when using visual fallback (default **200 ms**).
+How often Walkmark compares frames when using visual fallback (default **200 ms**).
 
 ### Stored screenshot width
 
@@ -88,13 +88,13 @@ Max width frames are saved at (default **1800 px**). Larger preserves detail; sm
 
 ### Visual fallback
 
-When **on**, Steppy also captures on significant screen changes if input monitoring is unavailable or as a backup. Adjust **Visual sensitivity** (only big changes → every small change) and **Wait for the screen to settle**.
+When **on**, Walkmark also captures on significant screen changes if input monitoring is unavailable or as a backup. Adjust **Visual sensitivity** (only big changes → every small change) and **Wait for the screen to settle**.
 
 On macOS with Accessibility permission, input-based capture is preferred; visual fallback is mainly for Linux or when input events are blocked.
 
 ### Get out of the way while recording
 
-When **on** (default), the main window hides and a floating **recording HUD** appears at the bottom of the screen. Turn off to keep the Steppy window visible.
+When **on** (default), the main window hides and a floating **recording HUD** appears at the bottom of the screen. Turn off to keep the Walkmark window visible.
 
 ## Appearance
 

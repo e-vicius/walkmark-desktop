@@ -5,7 +5,7 @@
 
 use std::path::PathBuf;
 
-use steppy_lib::probe::{self, provider, Provider};
+use walkmark_lib::probe::{self, provider, Provider};
 
 fn block_on<F: std::future::Future>(future: F) -> F::Output {
     tokio::runtime::Builder::new_current_thread()
@@ -17,13 +17,13 @@ fn block_on<F: std::future::Future>(future: F) -> F::Output {
 
 fn credentials_path() -> Option<PathBuf> {
     dirs::home_dir().map(|home| {
-        home.join("Library/Application Support/app.steppy.desktop/credentials.mistral")
+        home.join("Library/Application Support/app.walkmark.desktop/credentials.mistral")
     })
 }
 
 fn sample_frame() -> Option<PathBuf> {
     dirs::home_dir().and_then(|home| {
-        let root = home.join("Library/Application Support/app.steppy.desktop/projects");
+        let root = home.join("Library/Application Support/app.walkmark.desktop/projects");
         std::fs::read_dir(root)
             .ok()?
             .filter_map(|e| e.ok())

@@ -165,7 +165,7 @@
 		<div class="rounded-2xl bg-(--text)/5 px-4 py-3 text-xs leading-relaxed text-(--text)/56">
 			<p class="font-medium text-(--text)/72">Don't want Ollama?</p>
 			<p class="mt-1">
-				Steppy doesn't ship its own inference engine — Ollama handles downloads and GPU setup for
+				Walkmark doesn't ship its own inference engine — Ollama handles downloads and GPU setup for
 				the models above. If you already run Qwen, Gemma, or similar in
 				<strong class="font-medium text-(--text)/72">LM Studio</strong>,
 				<strong class="font-medium text-(--text)/72">llama.cpp</strong>, or

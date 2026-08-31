@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Steppy",
+  "productName": "Walkmark",
   "version": "0.1.1",
-  "identifier": "app.steppy.desktop",
+  "identifier": "app.walkmark.desktop",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -15,7 +15,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Steppy",
+        "title": "Walkmark",
         "width": 1320,
         "height": 860,
         "minWidth": 1040,
@@ -47,8 +47,8 @@
     "targets": ["app", "dmg", "nsis", "deb", "appimage"],
     "category": "Productivity",
     "shortDescription": "Turn any workflow into step-by-step documentation",
-    "longDescription": "Steppy watches you perform a task, automatically captures each meaningful step, writes the instructions with AI, and exports polished documentation as Markdown, HTML or PDF.",
-    "copyright": "© Steppy",
+    "longDescription": "Walkmark watches you perform a task, automatically captures each meaningful step, writes the instructions with AI, and exports polished documentation as Markdown, HTML or PDF.",
+    "copyright": "© Walkmark",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

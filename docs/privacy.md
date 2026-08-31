@@ -1,6 +1,6 @@
 # Privacy and data
 
-Steppy is built to keep capture and storage on your machine by default.
+Walkmark is built to keep capture and storage on your machine by default.
 
 ## Always local
 
@@ -15,17 +15,17 @@ These never require the network:
 | App preferences | `settings.json` in app data |
 | API keys (BYOK) | `credentials.<provider>` + OS secret store |
 
-Projects live in your platform app data directory as plain folders. Steppy does not operate a sync service for open source users.
+Projects live in your platform app data directory as plain folders. Walkmark does not operate a sync service for open source users.
 
 ### App data locations
 
 | OS | Path |
 | --- | --- |
-| macOS | `~/Library/Application Support/app.steppy.desktop/` |
-| Windows | `%APPDATA%\app.steppy.desktop\` |
-| Linux | `~/.local/share/app.steppy.desktop/` |
+| macOS | `~/Library/Application Support/app.walkmark.desktop/` |
+| Windows | `%APPDATA%\app.walkmark.desktop\` |
+| Linux | `~/.local/share/app.walkmark.desktop/` |
 
-You can back up, encrypt, or sync this folder with tools you trust. Steppy does not encrypt project folders separately from your disk encryption.
+You can back up, encrypt, or sync this folder with tools you trust. Walkmark does not encrypt project folders separately from your disk encryption.
 
 ## When data leaves your machine
 
@@ -36,9 +36,9 @@ Data is sent **only when you run Write** with a model that is not purely local:
 | **Ollama / compatible server on localhost** | Your machine only |
 | **Compatible server on LAN** | Your network |
 | **Bring your own key** (Gemini, OpenAI, Anthropic, Mistral, OpenRouter) | That provider's API |
-| **Steppy Cloud** (coming soon) | Steppy-hosted models under Cloud terms |
+| **Walkmark Cloud** (coming soon) | Walkmark-hosted models under Cloud terms |
 
-Steppy does not upload frames in the background. If you never click Write, or you only use local models, cloud providers never receive your screenshots.
+Walkmark does not upload frames in the background. If you never click Write, or you only use local models, cloud providers never receive your screenshots.
 
 ### What is sent on Write
 
@@ -56,13 +56,13 @@ Keys you enter for BYOK providers are:
 
 - Verified once against the provider API
 - Stored locally in app data and mirrored to the OS keychain / Secret Service when available
-- Read only by the Steppy process to sign requests
+- Read only by the Walkmark process to sign requests
 
-**Steppy never receives or stores your keys on our servers.**
+**Walkmark never receives or stores your keys on our servers.**
 
 Delete keys by removing them in Settings or deleting `credentials.<provider>` while the app is quit.
 
-## Steppy Cloud
+## Walkmark Cloud
 
 The paid Cloud plan (separate from this open source app) will include its own privacy terms when it launches. The OSS app remains fully usable without an account.
 
@@ -72,7 +72,7 @@ The open source app does not include analytics or crash reporting today. If that
 
 ## Enterprise
 
-Teams with SSO, audit logs, or on-prem deployment requirements can [contact us](mailto:hello@steppy.app).
+Teams with SSO, audit logs, or on-prem deployment requirements can [contact us](mailto:hello@walkmark.app).
 
 ## Related
 

@@ -2,30 +2,30 @@
 
 ## macOS permissions
 
-Steppy needs two permissions on macOS:
+Walkmark needs two permissions on macOS:
 
 ### Screen Recording
 
 Required to capture screenshots. If denied:
 
 1. Open **System Settings → Privacy & Security → Screen Recording**
-2. Enable **Steppy**
-3. Quit and reopen Steppy if it was already running
+2. Enable **Walkmark**
+3. Quit and reopen Walkmark if it was already running
 
 Use **Grant access** or **System Settings** from the onboarding banner or library.
 
 ### Accessibility
 
-Required to detect clicks, typing, and scrolling for timely step capture. Without it, Steppy falls back to visual-only detection, which is less reliable.
+Required to detect clicks, typing, and scrolling for timely step capture. Without it, Walkmark falls back to visual-only detection, which is less reliable.
 
 1. Open **System Settings → Privacy & Security → Accessibility**
-2. Enable **Steppy**
+2. Enable **Walkmark**
 
 ## Recording issues
 
 ### No steps captured
 
-- Interact with the target app — Steppy captures on input or screen change, not on idle screens.
+- Interact with the target app — Walkmark captures on input or screen change, not on idle screens.
 - Press **Shift + Alt + M** (or **Capture this moment** in the HUD) to force a step.
 - Lower **Minimum gap** in Settings → Recording if steps feel too sparse.
 - Increase **Pause after each action** if frames fire before dialogs open.
@@ -106,4 +106,4 @@ See [Getting started — Where projects live](getting-started.md#where-projects-
 
 ## Still stuck?
 
-[Open an issue on GitHub](https://github.com/e-vicius/steppy-desktop/issues) with your OS version, Steppy version, and what you expected vs what happened. Screenshots of error toasts help.
+[Open an issue on GitHub](https://github.com/e-vicius/walkmark-desktop/issues) with your OS version, Walkmark version, and what you expected vs what happened. Screenshots of error toasts help.

@@ -749,7 +749,7 @@ pub fn suggest_export_name(state: State<AppState>, format: ExportFormat) -> Stri
         .lock()
         .as_ref()
         .map(|p| export::default_file_name(p, format))
-        .unwrap_or_else(|| format!("steppy-document.{}", format.extension()))
+        .unwrap_or_else(|| format!("walkmark-document.{}", format.extension()))
 }
 
 #[tauri::command]

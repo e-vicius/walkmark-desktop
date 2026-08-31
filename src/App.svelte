@@ -44,7 +44,7 @@
 			} catch (error) {
 				if (cancelled) return;
 				bootError =
-					error instanceof Error ? error.message : "Steppy could not connect to the app.";
+					error instanceof Error ? error.message : "Walkmark could not connect to the app.";
 				connected = true;
 				store.ready = true;
 			}
@@ -89,7 +89,7 @@
 	<div class="grid h-full place-items-center p-8">
 		<div class="max-w-md rounded-3xl bg-(--bg-elevated) p-8 text-center">
 			<Icon icon="lucide:triangle-alert" class="mx-auto mb-4 size-8 text-(--text)/40" />
-			<h1 class="font-semibold">Steppy couldn't start</h1>
+			<h1 class="font-semibold">Walkmark couldn't start</h1>
 			<p class="mt-2 text-sm text-(--text)/56">{bootError}</p>
 			<Button class="mt-6" onclick={() => location.reload()}>Reload</Button>
 		</div>

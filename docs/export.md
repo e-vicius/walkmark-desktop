@@ -14,7 +14,7 @@ Best for: Git repos, wikis, static site generators, Notion import, docs-as-code 
 
 One **self-contained** `.html` file with images embedded as base64. No external files, no CDN — works offline and in email attachments.
 
-Best for: sharing with someone who does not have Steppy, internal wikis that accept HTML upload, quick review in a browser.
+Best for: sharing with someone who does not have Walkmark, internal wikis that accept HTML upload, quick review in a browser.
 
 ### PDF
 
@@ -33,7 +33,7 @@ Best for: handbooks, compliance packets, printed runbooks, sign-off documents.
 | **Prerequisites** | On | All formats |
 | **Theme** | Auto | HTML only — light, dark, or follow system |
 
-After export, Steppy can:
+After export, Walkmark can:
 
 - **Reveal in Finder / Explorer** — open the containing folder
 - **Copy Markdown to clipboard** — paste into Slack, Notion, etc.

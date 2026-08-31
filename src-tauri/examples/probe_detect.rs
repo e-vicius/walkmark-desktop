@@ -14,7 +14,7 @@ fn main() {
     let seconds: u64 = args.next().and_then(|a| a.parse().ok()).unwrap_or(20);
     let sensitivity: f32 = args.next().and_then(|a| a.parse().ok()).unwrap_or(0.55);
 
-    let sources = match steppy_lib::probe::list_sources(false) {
+    let sources = match walkmark_lib::probe::list_sources(false) {
         Ok(s) => s,
         Err(e) => return println!("listing failed: {e}"),
     };
@@ -25,10 +25,10 @@ fn main() {
     println!(
         "watching {} for {seconds}s at sensitivity {sensitivity} (threshold {:.4})",
         monitor.name,
-        steppy_lib::probe::threshold_for(sensitivity)
+        walkmark_lib::probe::threshold_for(sensitivity)
     );
 
-    let samples = match steppy_lib::probe::trace(
+    let samples = match walkmark_lib::probe::trace(
         &monitor.id,
         Duration::from_secs(seconds),
         Duration::from_millis(600),

@@ -83,10 +83,10 @@ pub fn render(project: &Project, steps: &[RenderedStep], options: &ExportOptions
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\
 <title>{title}</title>\n\
 <meta name=\"description\" content=\"{desc}\">\n\
-<meta name=\"generator\" content=\"Steppy\">\n\
+<meta name=\"generator\" content=\"Walkmark\">\n\
 <style>{css}</style>\n</head>\n<body>\n\
 <div class=\"layout{layout_mod}\">\n{toc}\n<main>\n{body}\n\
-<footer class=\"doc-foot\">Generated with Steppy</footer>\n</main>\n</div>\n{script}\n</body>\n</html>\n",
+<footer class=\"doc-foot\">Generated with Walkmark</footer>\n</main>\n</div>\n{script}\n</body>\n</html>\n",
         theme = esc(&options.theme),
         title = esc(&project.title),
         desc = esc(project.summary.trim()),

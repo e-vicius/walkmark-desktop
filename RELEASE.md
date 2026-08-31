@@ -8,7 +8,7 @@ Update version in all three places:
 - `src-tauri/tauri.conf.json`
 - `src-tauri/Cargo.toml` (`[package].version`)
 
-Also bump `APP_VERSION` in [steppy-landing `src/lib/downloads.ts`](https://github.com/e-vicius/steppy-landing/blob/main/src/lib/downloads.ts).
+Also bump `APP_VERSION` in [walkmark-landing `src/lib/downloads.ts`](https://github.com/e-vicius/walkmark-landing/blob/main/src/lib/downloads.ts).
 
 ## 2. Update changelog
 
@@ -34,15 +34,15 @@ Artifacts land in `src-tauri/target/release/bundle/`:
 
 | Platform | Typical files |
 | --- | --- |
-| macOS arm64 | `dmg/Steppy_<version>_aarch64.dmg` |
-| macOS x64 | `dmg/Steppy_<version>_x64.dmg` |
-| Windows x64 | `nsis/Steppy_<version>_x64-setup.exe` |
-| Windows ARM64 | `nsis/Steppy_<version>_arm64-setup.exe` |
-| Linux | `appimage/Steppy_<version>_amd64.AppImage`, `deb/steppy_<version>_amd64.deb` |
+| macOS arm64 | `dmg/Walkmark_<version>_aarch64.dmg` |
+| macOS x64 | `dmg/Walkmark_<version>_x64.dmg` |
+| Windows x64 | `nsis/Walkmark_<version>_x64-setup.exe` |
+| Windows ARM64 | `nsis/Walkmark_<version>_arm64-setup.exe` |
+| Linux | `appimage/Walkmark_<version>_amd64.AppImage`, `deb/walkmark_<version>_amd64.deb` |
 
 ## 5. Verify downloads
 
-Open the [latest release](https://github.com/e-vicius/steppy-desktop/releases/latest) and confirm filenames match `src/lib/downloads.ts` on the landing site.
+Open the [latest release](https://github.com/e-vicius/walkmark-desktop/releases/latest) and confirm filenames match `src/lib/downloads.ts` on the landing site.
 
 ## Code signing (optional)
 

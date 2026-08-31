@@ -63,7 +63,7 @@ fn open_hud(app: &AppHandle) -> tauri::Result<()> {
     }
 
     let mut builder = WebviewWindowBuilder::new(app, HUD, WebviewUrl::App("index.html".into()))
-        .title("Steppy recording")
+        .title("Walkmark recording")
         .inner_size(HUD_W, HUD_H)
         .resizable(false)
         .decorations(false)

@@ -1,6 +1,6 @@
 # App screenshots
 
-PNG previews for the GitHub README and docs. They are rendered from static HTML mocks in [`scripts/screenshots/`](../../scripts/screenshots/) that match the Steppy UI (library, editor, export, and the record → edit → export flow).
+PNG previews for the GitHub README and docs. They are rendered from static HTML mocks in [`scripts/screenshots/`](../../scripts/screenshots/) that match the Walkmark UI (library, editor, export, and the record → edit → export flow).
 
 Regenerate after UI changes:
 

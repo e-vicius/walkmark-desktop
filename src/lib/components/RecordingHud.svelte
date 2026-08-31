@@ -43,7 +43,7 @@
 </script>
 
 <style>
-	@keyframes steppy-pulse-ring {
+	@keyframes walkmark-pulse-ring {
 		0% {
 			opacity: 0.55;
 			transform: scale(0.86);
@@ -58,7 +58,7 @@
 		}
 	}
 	.pulse-ring {
-		animation: steppy-pulse-ring 1.8s ease-out infinite;
+		animation: walkmark-pulse-ring 1.8s ease-out infinite;
 	}
 </style>
 

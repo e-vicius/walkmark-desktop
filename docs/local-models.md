@@ -1,17 +1,17 @@
 # Local models
 
-Run AI writing entirely on your hardware. No API key, no data sent to Steppy's servers or third-party cloud APIs.
+Run AI writing entirely on your hardware. No API key, no data sent to Walkmark's servers or third-party cloud APIs.
 
 Recording, editing, and export stay local either way. Only the **Write** action sends screenshots to a model — with local models that endpoint is on your machine or LAN.
 
 ## Ollama
 
 1. Install [Ollama](https://ollama.com/download) and ensure the background service is running.
-2. In Steppy, open **Settings → Model** and select **On this Mac** (Ollama provider).
+2. In Walkmark, open **Settings → Model** and select **On this Mac** (Ollama provider).
 3. Download a **vision** model from the catalog (vision badge). Text-only models cannot read screenshots.
 4. Pick the model in the document toolbar and write as usual.
 
-Steppy talks to Ollama at `http://127.0.0.1:11434` by default.
+Walkmark talks to Ollama at `http://127.0.0.1:11434` by default.
 
 ### Catalog and downloads
 
@@ -41,11 +41,11 @@ Ollama writes **one step at a time** regardless of the Concurrency slider — lo
 Any **OpenAI-compatible** HTTP API works:
 
 1. Start LM Studio (or vLLM, llama.cpp server, etc.) and enable the local server.
-2. In Steppy **Settings → Model**, choose **Custom endpoint**.
+2. In Walkmark **Settings → Model**, choose **Custom endpoint**.
 3. Set the **base URL** (e.g. `http://127.0.0.1:1234/v1`) and a vision-capable **model id**.
 4. API key is optional — leave blank if the server does not require one.
 
-Steppy sends chat-completions-style requests with image attachments the same way it does for cloud vision models.
+Walkmark sends chat-completions-style requests with image attachments the same way it does for cloud vision models.
 
 ## Troubleshooting local models
 
@@ -60,7 +60,7 @@ See [Troubleshooting](troubleshooting.md).
 
 ## Local vs cloud
 
-| | Local (Ollama / compatible) | Cloud (BYOK or Steppy Cloud) |
+| | Local (Ollama / compatible) | Cloud (BYOK or Walkmark Cloud) |
 | --- | --- | --- |
 | Data leaves your machine | No (LAN only if remote server) | Yes, when writing |
 | Setup | Install runtime + model | API key or Cloud account |

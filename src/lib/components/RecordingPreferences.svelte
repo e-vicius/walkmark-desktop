@@ -16,7 +16,7 @@
 
 <div class="space-y-5">
 	<p class="text-sm text-(--text)/56">
-		Steppy captures a step whenever you click, type, or scroll. On macOS it also needs
+		Walkmark captures a step whenever you click, type, or scroll. On macOS it also needs
 		Accessibility permission to watch those actions.
 	</p>
 
@@ -163,7 +163,7 @@
 			<div>
 				<Label>Get out of the way while recording</Label>
 				<p class="text-xs text-(--text)/56">
-					Minimises Steppy and shows a small floating controller instead.
+					Minimises Walkmark and shows a small floating controller instead.
 				</p>
 			</div>
 			<Switch

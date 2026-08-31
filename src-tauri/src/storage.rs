@@ -8,11 +8,13 @@ use tauri::{AppHandle, Manager};
 use crate::error::{AppError, Result};
 use crate::models::{Project, ProjectSummary, Provider, Settings, StepStatus};
 
-const KEYRING_SERVICE: &str = "app.steppy";
+const KEYRING_SERVICE: &str = "app.walkmark";
 /// Gemini-only builds stored one unlabelled key here.
 const LEGACY_KEYRING_SERVICE: &str = "app.stepsy.gemini";
-/// Stepsy renamed to Steppy — move provider keys across on first launch.
-const PREVIOUS_KEYRING_SERVICE: &str = "app.stepsy";
+/// Services used under earlier product names (Stepsy, then Steppy), newest
+/// first. Provider keys are moved across on first launch so a rename never
+/// strands a user's API keys in an unreachable keychain entry.
+const PREVIOUS_KEYRING_SERVICES: &[&str] = &["app.steppy", "app.stepsy"];
 
 /// ```text
 /// <app data>/
@@ -404,7 +406,7 @@ fn migrate_legacy_key(app: &AppHandle) {
     let _ = fs::remove_file(legacy_file);
 }
 
-/// Move API keys from the old Stepsy keychain service to Steppy.
+/// Move API keys across from keychain services used under earlier product names.
 fn migrate_previous_keyring(app: &AppHandle) {
     for provider in Provider::ALL {
         if !provider.needs_key() {
@@ -413,17 +415,20 @@ fn migrate_previous_keyring(app: &AppHandle) {
         if get_api_key(app, provider).is_some() {
             continue;
         }
-        let Ok(entry) = keyring::Entry::new(PREVIOUS_KEYRING_SERVICE, provider.id()) else {
-            continue;
-        };
-        let Ok(key) = entry.get_password() else {
-            continue;
-        };
-        if key.trim().is_empty() {
-            continue;
+        for service in PREVIOUS_KEYRING_SERVICES {
+            let Ok(entry) = keyring::Entry::new(service, provider.id()) else {
+                continue;
+            };
+            let Ok(key) = entry.get_password() else {
+                continue;
+            };
+            if key.trim().is_empty() {
+                continue;
+            }
+            let _ = set_api_key(app, provider, key.trim());
+            let _ = entry.delete_credential();
+            break;
         }
-        let _ = set_api_key(app, provider, key.trim());
-        let _ = entry.delete_credential();
     }
 }
 

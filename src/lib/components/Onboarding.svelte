@@ -44,7 +44,7 @@
 <Dialog {open} onOpenChange={handleOpenChange}>
 	<DialogContent class="flex h-[min(680px,86vh)] w-full max-w-3xl flex-col gap-0 overflow-hidden p-0">
 		<DialogHeader class="border-b border-(--text)/8 px-6 py-5">
-			<DialogTitle>Welcome to Steppy</DialogTitle>
+			<DialogTitle>Welcome to Walkmark</DialogTitle>
 			<DialogDescription>
 				Start with Google Gemini, OpenAI, Claude, Mistral, or OpenRouter — each has several models to
 				choose from. Local models need Ollama installed.
@@ -56,7 +56,7 @@
 				<div class="rounded-3xl bg-(--bg) p-4">
 					<p class="text-sm font-medium text-(--text)">Screen recording access</p>
 					<p class="mt-1 text-xs text-(--text)/56">
-						macOS needs permission before Steppy can capture your screen.
+						macOS needs permission before Walkmark can capture your screen.
 					</p>
 					<div class="mt-3 flex gap-2">
 						<Button
@@ -76,7 +76,7 @@
 				<div class="rounded-3xl bg-(--bg) p-4">
 					<p class="text-sm font-medium text-(--text)">Accessibility access</p>
 					<p class="mt-1 text-xs text-(--text)/56">
-						Steppy watches clicks, typing, and scrolling to know when to capture a step. macOS
+						Walkmark watches clicks, typing, and scrolling to know when to capture a step. macOS
 						needs Accessibility permission for that.
 					</p>
 					<div class="mt-3 flex gap-2">

@@ -23,7 +23,7 @@ await page.addInitScript(() => {
         keyGuide: [
           "Open Google AI Studio and sign in.",
           "Click Create API key.",
-          "Copy the key and paste it in Steppy.",
+          "Copy the key and paste it in Walkmark.",
         ],
         baseUrlEditable: false,
         baseUrlRequired: false,
@@ -180,5 +180,5 @@ console.log(
     2,
   ),
 );
-await page.screenshot({ path: "/tmp/steppy-ui-check.png", fullPage: true });
+await page.screenshot({ path: "/tmp/walkmark-ui-check.png", fullPage: true });
 await browser.close();

@@ -78,7 +78,7 @@ pub fn write(
         }
     }
 
-    doc.push_str("---\n\n_Generated with Steppy._\n");
+    doc.push_str("---\n\n_Generated with Walkmark._\n");
     std::fs::write(destination, doc)?;
     Ok(assets)
 }

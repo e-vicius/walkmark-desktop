@@ -1,8 +1,8 @@
 //! Managing models that run on this machine.
 //!
-//! Steppy does not ship an inference engine. It drives [Ollama], which is the
+//! Walkmark does not ship an inference engine. It drives [Ollama], which is the
 //! one thing on every desktop platform that already solves GPU detection,
-//! quantisation and weight storage. What Steppy adds is that you never have to
+//! quantisation and weight storage. What Walkmark adds is that you never have to
 //! open a terminal: the app finds the daemon, lists what you have, downloads
 //! what you don't, and reports progress while it happens.
 //!

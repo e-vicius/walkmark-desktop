@@ -1,6 +1,6 @@
 # Recording
 
-Recording is where Steppy watches a screen or window, captures PNG frames at meaningful moments, and builds the step rail for your guide.
+Recording is where Walkmark watches a screen or window, captures PNG frames at meaningful moments, and builds the step rail for your guide.
 
 ## Starting a recording
 
@@ -25,17 +25,17 @@ The thumbnail updates live — confirm you selected the right target before clic
 
 ## How steps are captured
 
-Steppy uses two mechanisms:
+Walkmark uses two mechanisms:
 
 ### Input-based capture (preferred on macOS)
 
-When **Accessibility** permission is granted, Steppy listens for clicks, key presses, and scrolls. After each action it waits **Pause after each action** (default 300 ms), then grabs a frame.
+When **Accessibility** permission is granted, Walkmark listens for clicks, key presses, and scrolls. After each action it waits **Pause after each action** (default 300 ms), then grabs a frame.
 
 This produces frames aligned with what you did, not arbitrary animation mid-flight.
 
 ### Visual fallback (optional)
 
-When **Visual fallback** is on in **Settings → Recording**, Steppy also compares periodic screenshots. If the image changes enough — and **Minimum gap between steps** has passed — it saves a step even without a fresh input event.
+When **Visual fallback** is on in **Settings → Recording**, Walkmark also compares periodic screenshots. If the image changes enough — and **Minimum gap between steps** has passed — it saves a step even without a fresh input event.
 
 Useful when:
 
@@ -51,7 +51,7 @@ A cooldown (default **800 ms**) between automatic steps. Prevents key repeat, do
 
 ## Recording HUD
 
-When **Get out of the way while recording** is on (default), Steppy minimizes and shows a compact HUD:
+When **Get out of the way while recording** is on (default), Walkmark minimizes and shows a compact HUD:
 
 | Control | Shortcut (global) | Action |
 | --- | --- | --- |
@@ -61,7 +61,7 @@ When **Get out of the way while recording** is on (default), Steppy minimizes an
 
 The HUD shows elapsed time, step count, and a simple activity indicator.
 
-Global shortcuts work while Steppy is in the background — switch to your target app and keep working.
+Global shortcuts work while Walkmark is in the background — switch to your target app and keep working.
 
 ## Manual steps
 
@@ -75,7 +75,7 @@ Manual marks respect the minimum gap like automatic steps.
 
 ## Alternate frames
 
-When Steppy captures near the same moment, it may store **alternate** frames for a step. In the editor, open **Different moment** on the screenshot to pick the best frame. See [Editing guides — Pick a different moment](editing.md#pick-a-different-moment).
+When Walkmark captures near the same moment, it may store **alternate** frames for a step. In the editor, open **Different moment** on the screenshot to pick the best frame. See [Editing guides — Pick a different moment](editing.md#pick-a-different-moment).
 
 ## Pause and resume
 
@@ -122,4 +122,4 @@ Window and monitor capture via the OS APIs. ARM64 and x64 builds behave the same
 
 ### Linux
 
-Wayland support varies by compositor. If window capture fails, try a monitor source. For headless or remote sessions, capture may not be available — Steppy needs a local graphical session.
+Wayland support varies by compositor. If window capture fails, try a monitor source. For headless or remote sessions, capture may not be available — Walkmark needs a local graphical session.

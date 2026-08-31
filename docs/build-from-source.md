@@ -1,6 +1,6 @@
 # Build from source
 
-Compile Steppy locally for development, custom builds, or platforms without a prebuilt release.
+Compile Walkmark locally for development, custom builds, or platforms without a prebuilt release.
 
 ## Requirements
 
@@ -16,8 +16,8 @@ Compile Steppy locally for development, custom builds, or platforms without a pr
 ## Clone and install
 
 ```bash
-git clone https://github.com/e-vicius/steppy-desktop.git
-cd steppy
+git clone https://github.com/e-vicius/walkmark-desktop.git
+cd walkmark
 pnpm install
 ```
 
@@ -68,7 +68,7 @@ pnpm tauri build --target aarch64-pc-windows-msvc --bundles nsis
 | Windows x64 / ARM64 | NSIS `.exe` installer |
 | Linux | `.deb`, `.AppImage` |
 
-Release filenames follow `Steppy_<version>_<arch>.<ext>` — see `.github/workflows/release.yml` for CI matrix.
+Release filenames follow `Walkmark_<version>_<arch>.<ext>` — see `.github/workflows/release.yml` for CI matrix.
 
 ## Tests
 
@@ -103,15 +103,15 @@ Deep dive: [Architecture](architecture.md).
 
 ## Release process (maintainers)
 
-Documented in [RELEASE.md](https://github.com/e-vicius/steppy-desktop/blob/main/RELEASE.md). Summary:
+Documented in [RELEASE.md](https://github.com/e-vicius/walkmark-desktop/blob/main/RELEASE.md). Summary:
 
 1. Bump version in `src-tauri/tauri.conf.json` and `package.json`.
-2. Update [CHANGELOG.md](https://github.com/e-vicius/steppy-desktop/blob/main/CHANGELOG.md).
+2. Update [CHANGELOG.md](https://github.com/e-vicius/walkmark-desktop/blob/main/CHANGELOG.md).
 3. Tag `vX.Y.Z` and push — GitHub Actions builds platform artifacts.
 4. Attach or verify release assets on GitHub Releases.
 
 ## Contributing
 
-Bug reports and pull requests welcome on [GitHub](https://github.com/e-vicius/steppy-desktop). See [CONTRIBUTING.md](https://github.com/e-vicius/steppy-desktop/blob/main/CONTRIBUTING.md).
+Bug reports and pull requests welcome on [GitHub](https://github.com/e-vicius/walkmark-desktop). See [CONTRIBUTING.md](https://github.com/e-vicius/walkmark-desktop/blob/main/CONTRIBUTING.md).
 
 Licence: MIT.

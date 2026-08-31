@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>Steppy captures screenshots of the screen or window you choose so it can build step-by-step documentation of your workflow.</string>
+	<string>Walkmark captures screenshots of the screen or window you choose so it can build step-by-step documentation of your workflow.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>LSApplicationCategoryType</key>

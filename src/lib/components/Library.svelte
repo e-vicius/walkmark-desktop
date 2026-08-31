@@ -90,7 +90,7 @@
 					Document what you just did
 				</h1>
 				<p class="mt-2 max-w-md text-sm leading-relaxed text-(--text)/56">
-					Steppy watches a screen or window, captures each meaningful step, and writes
+					Walkmark watches a screen or window, captures each meaningful step, and writes
 					the instructions for you.
 				</p>
 				<Button class="mt-8" onclick={() => store.setDialog("sources")}>
@@ -228,7 +228,7 @@
 					<Icon icon="lucide:monitor-play" class="size-4 flex-none text-red-500" />
 					<div class="min-w-0 flex-1">
 						<p class="text-sm font-medium text-(--text)">Screen recording access is off</p>
-						<p class="text-xs text-(--text)/56">macOS needs permission before Steppy can capture.</p>
+						<p class="text-xs text-(--text)/56">macOS needs permission before Walkmark can capture.</p>
 					</div>
 					<Button size="sm" variant="ghost" onclick={() => store.setDialog("onboarding")}>
 						Fix this

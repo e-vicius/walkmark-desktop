@@ -162,7 +162,7 @@ pub fn slugify(input: &str) -> String {
     }
     let trimmed = out.trim_matches('-').to_string();
     if trimmed.is_empty() {
-        "steppy-document".into()
+        "walkmark-document".into()
     } else {
         trimmed
     }
@@ -188,6 +188,6 @@ mod tests {
     fn slugs_are_url_safe() {
         assert_eq!(slugify("Creating a New Invoice"), "creating-a-new-invoice");
         assert_eq!(slugify("  Spaces  &  symbols!! "), "spaces-symbols");
-        assert_eq!(slugify("!!!"), "steppy-document");
+        assert_eq!(slugify("!!!"), "walkmark-document");
     }
 }

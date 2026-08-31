@@ -14,7 +14,7 @@ use std::thread;
 use std::time::Duration;
 
 use serde_json::Value;
-use steppy_lib::probe::{local, provider, Provider};
+use walkmark_lib::probe::{local, provider, Provider};
 
 /// What the stub saw, so a test can assert on the request as well as use the
 /// response.

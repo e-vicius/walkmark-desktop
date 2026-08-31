@@ -5,7 +5,7 @@
 
 use std::path::{Path, PathBuf};
 
-use steppy_lib::probe::{
+use walkmark_lib::probe::{
     apply_annotations, encode_png, fit_width, html, load, markdown, pdf, ExportFormat,
     ExportOptions, Project, RenderedImage, RenderedStep,
 };
@@ -14,16 +14,16 @@ fn projects_dir() -> PathBuf {
     let home = std::env::var("HOME").expect("HOME");
     if cfg!(target_os = "macos") {
         Path::new(&home)
-            .join("Library/Application Support/app.steppy.desktop/projects")
+            .join("Library/Application Support/app.walkmark.desktop/projects")
     } else {
-        Path::new(&home).join(".local/share/app.steppy.desktop/projects")
+        Path::new(&home).join(".local/share/app.walkmark.desktop/projects")
     }
 }
 
 fn main() {
     let mut args = std::env::args().skip(1);
     let id = args.next().unwrap_or_else(|| "demo-guide".into());
-    let out = PathBuf::from(args.next().unwrap_or_else(|| "/tmp/steppy-export".into()));
+    let out = PathBuf::from(args.next().unwrap_or_else(|| "/tmp/walkmark-export".into()));
     std::fs::create_dir_all(&out).expect("create out dir");
 
     let root = projects_dir().join(&id);

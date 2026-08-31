@@ -246,7 +246,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open Google AI Studio and sign in with your Google account.",
                 "Click Create API key and pick an existing Google Cloud project, or create one.",
                 "Copy the key immediately — Google only shows it once.",
-                "Paste it below. Steppy stores it securely on this device.",
+                "Paste it below. Walkmark stores it securely on this device.",
             ],
         ),
         Provider::OpenAi => (
@@ -258,7 +258,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open the OpenAI Platform and sign in or create an account.",
                 "Add a payment method if prompted — even small usage requires billing on file.",
                 "Go to API keys and click Create new secret key.",
-                "Copy the key and paste it below. Steppy stores it securely on this device.",
+                "Copy the key and paste it below. Walkmark stores it securely on this device.",
             ],
         ),
         Provider::Anthropic => (
@@ -270,7 +270,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open the Anthropic Console and sign in or create an account.",
                 "Add billing if you have not used the API before.",
                 "Open Settings → API keys and click Create Key.",
-                "Copy the key and paste it below. Steppy stores it securely on this device.",
+                "Copy the key and paste it below. Walkmark stores it securely on this device.",
             ],
         ),
         Provider::Mistral => (
@@ -282,7 +282,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open the Mistral Console and sign in or create an account.",
                 "Add billing if prompted — API usage is pay-as-you-go.",
                 "Go to API keys and create a new key.",
-                "Copy the key and paste it below. Steppy stores it securely on this device.",
+                "Copy the key and paste it below. Walkmark stores it securely on this device.",
             ],
         ),
         Provider::OpenRouter => (
@@ -294,7 +294,7 @@ pub fn provider_info(provider: Provider) -> ProviderInfo {
                 "Open OpenRouter and sign in or create an account.",
                 "Add credits if prompted — OpenRouter bills per model you use.",
                 "Go to Keys and create an API key.",
-                "Copy the key and paste it below. Steppy stores it securely on this device.",
+                "Copy the key and paste it below. Walkmark stores it securely on this device.",
             ],
         ),
         Provider::Ollama => (
@@ -342,7 +342,7 @@ pub fn all_providers() -> Vec<ProviderInfo> {
 
 /// Retired model ids, mapped to the closest thing that still exists.
 ///
-/// Somebody who set up Steppy months ago shouldn't open the app one day to a
+/// Somebody who set up Walkmark months ago shouldn't open the app one day to a
 /// 404 from a model Google turned off; this quietly moves them forward.
 pub fn migrate_model(provider: Provider, model: &str) -> Option<&'static str> {
     let replacement = match (provider, model) {

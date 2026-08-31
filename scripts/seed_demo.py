@@ -16,7 +16,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-IDENTIFIER = "app.steppy.desktop"
+IDENTIFIER = "app.walkmark.desktop"
 FRAME_WIDTH = 1800
 
 PALETTE = [

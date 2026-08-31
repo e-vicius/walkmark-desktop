@@ -1,18 +1,18 @@
 # Getting started
 
-Steppy turns a workflow you perform once into step-by-step documentation someone else can follow. This guide covers install, your first recording, permissions, the library, and writing instructions.
+Walkmark turns a workflow you perform once into step-by-step documentation someone else can follow. This guide covers install, your first recording, permissions, the library, and writing instructions.
 
 ## Install
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/e-vicius/steppy-desktop/releases/latest):
+Download the latest release for your platform from [GitHub Releases](https://github.com/e-vicius/walkmark-desktop/releases/latest):
 
 | Platform | File | Notes |
 | --- | --- | --- |
-| **macOS** | `Steppy_*_aarch64.dmg` or `*_x64.dmg` | Apple Silicon or Intel |
+| **macOS** | `Walkmark_*_aarch64.dmg` or `*_x64.dmg` | Apple Silicon or Intel |
 | **Windows** | `*_x64-setup.exe` or `*_arm64-setup.exe` | x64 or native ARM64 (Surface, Snapdragon PCs) |
 | **Linux** | `*_amd64.AppImage` or `*.deb` | AppImage is portable; `.deb` for Debian/Ubuntu |
 
-You can also download from [steppy.app](https://steppy.app/#download) — the site detects your OS and recommends the right build.
+You can also download from [walkmark.app](https://walkmark.app/#download) — the site detects your OS and recommends the right build.
 
 ### Build from source
 
@@ -20,7 +20,7 @@ See [Build from source](build-from-source.md) if you prefer to compile locally o
 
 ## First launch
 
-On first open, Steppy shows **onboarding**:
+On first open, Walkmark shows **onboarding**:
 
 1. **Permissions** (macOS) — Screen Recording and Accessibility.
 2. **Pick a model** — choose a cloud provider and paste an API key, or install Ollama for local models.
@@ -43,9 +43,9 @@ An empty library shows a single **Record your first guide** button.
 
 1. Click **New guide**.
 2. In the source picker, choose **audience**, **voice**, **language**, and **product** (optional — defaults come from [Settings → Writing](settings.md)).
-3. Pick a **screen or window**. Steppy only captures that area.
+3. Pick a **screen or window**. Walkmark only captures that area.
 4. Click **Record**. A countdown runs (default 3 seconds) so you can switch to the target app.
-5. Do the task normally. Steppy saves a screenshot when it detects a meaningful change, or when you mark a step manually.
+5. Do the task normally. Walkmark saves a screenshot when it detects a meaningful change, or when you mark a step manually.
 6. Click **Stop** in the HUD or press **Shift + Alt + S**.
 
 You land in the **editor**: step rail on the left, document on the right.
@@ -56,14 +56,14 @@ See [Recording](recording.md) for HUD controls, pause, and tuning capture sensit
 
 ### macOS
 
-Steppy needs two permissions:
+Walkmark needs two permissions:
 
 | Permission | Why |
 | --- | --- |
 | **Screen Recording** | Capture screenshots of the area you selected |
 | **Accessibility** | Detect clicks, typing, and scrolling so steps fire at the right moment |
 
-Grant both in **System Settings → Privacy & Security**. If Steppy was denied earlier, remove it from the list and try again so macOS shows the prompt.
+Grant both in **System Settings → Privacy & Security**. If Walkmark was denied earlier, remove it from the list and try again so macOS shows the prompt.
 
 The library banner links directly to the right pane when permission is missing.
 
@@ -80,7 +80,7 @@ Depends on your desktop environment. **X11** generally works out of the box. **W
 1. Open the guide in the editor.
 2. Pick a **model** in the toolbar (overrides the default from Settings for this document).
 3. Click **Write N steps** (only unwritten steps) or **Rewrite** (all unlocked steps).
-4. Steppy runs a **two-pass** write: outline from all frames, then each step body in order. Progress appears on step cards.
+4. Walkmark runs a **two-pass** write: outline from all frames, then each step body in order. Progress appears on step cards.
 5. Edit anything that reads wrong, then **Export** (**⌘E** / **Ctrl+E**).
 
 You can skip AI entirely and type titles and instructions yourself.
@@ -93,9 +93,9 @@ Everything stays on disk under your platform app data folder:
 
 | OS | Path |
 | --- | --- |
-| **macOS** | `~/Library/Application Support/app.steppy.desktop/` |
-| **Windows** | `%APPDATA%\app.steppy.desktop\` |
-| **Linux** | `~/.local/share/app.steppy.desktop/` (or `$XDG_DATA_HOME`) |
+| **macOS** | `~/Library/Application Support/app.walkmark.desktop/` |
+| **Windows** | `%APPDATA%\app.walkmark.desktop\` |
+| **Linux** | `~/.local/share/app.walkmark.desktop/` (or `$XDG_DATA_HOME`) |
 
 Each guide is a folder:
 
@@ -105,7 +105,7 @@ projects/<uuid>/
   frames/         PNG screenshots
 ```
 
-Copy the whole `projects/` directory (and `settings.json` if you want preferences) to back up or move machines. Steppy does not sync this for you.
+Copy the whole `projects/` directory (and `settings.json` if you want preferences) to back up or move machines. Walkmark does not sync this for you.
 
 API keys live in `credentials.<provider>` files in the same app data folder, mirrored to the OS keychain when available.
 

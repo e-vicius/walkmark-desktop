@@ -11,7 +11,7 @@
 
 ## While recording (global)
 
-These work even when Steppy is in the background. Shown in the HUD as **⇧⌥** on Mac (Shift + Alt).
+These work even when Walkmark is in the background. Shown in the HUD as **⇧⌥** on Mac (Shift + Alt).
 
 | Shortcut | Action |
 | --- | --- |

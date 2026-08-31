@@ -5,7 +5,7 @@ use image::{Rgba, RgbaImage};
 use crate::error::Result;
 use crate::models::{Annotation, AnnotationKind, AnnotationStroke};
 
-/// Steppy's default accent when no colour is stored on the annotation.
+/// Walkmark's default accent when no colour is stored on the annotation.
 const HIGHLIGHT: Rgba<u8> = Rgba([99, 102, 241, 255]);
 const REDACT_FILL: Rgba<u8> = Rgba([24, 24, 27, 255]);
 

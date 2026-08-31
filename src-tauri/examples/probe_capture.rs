@@ -6,10 +6,10 @@
 use std::time::Instant;
 
 fn main() {
-    println!("permission granted: {}", steppy_lib::probe::has_permission());
+    println!("permission granted: {}", walkmark_lib::probe::has_permission());
 
     let started = Instant::now();
-    match steppy_lib::probe::list_sources(false) {
+    match walkmark_lib::probe::list_sources(false) {
         Ok(sources) => {
             println!("{} sources in {:?}", sources.len(), started.elapsed());
             for source in sources.iter().take(12) {
@@ -21,7 +21,7 @@ fn main() {
 
             if let Some(monitor) = sources.iter().find(|s| s.id.starts_with("monitor:")) {
                 let started = Instant::now();
-                match steppy_lib::probe::grab(&monitor.id) {
+                match walkmark_lib::probe::grab(&monitor.id) {
                     Ok((w, h, elapsed_hash)) => println!(
                         "captured {w}x{h} in {:?} (signature in {elapsed_hash:?})",
                         started.elapsed()

@@ -194,5 +194,5 @@ pub fn run() {
             commands::reveal_in_folder,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Steppy");
+        .expect("error while running Walkmark");
 }
