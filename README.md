@@ -24,13 +24,13 @@ Walkmark is a native desktop app. You pick a screen or window, do the task, and 
 
 | Platform | Install |
 | --- | --- |
-| **macOS** (Apple Silicon) | [`.dmg` aarch64](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.1_aarch64.dmg) |
-| **macOS** (Intel) | [`.dmg` x64](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.1_x64.dmg) |
-| **Windows** (x64) | [`.exe` installer](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.1_x64-setup.exe) |
-| **Windows** (ARM64) | [`.exe` installer](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.1_arm64-setup.exe) |
-| **Linux** | [AppImage](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.1_amd64.AppImage) · [`.deb`](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/walkmark_0.1.1_amd64.deb) |
+| **macOS** (Apple Silicon) | [`.dmg` aarch64](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.2_aarch64.dmg) |
+| **macOS** (Intel) | [`.dmg` x64](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.2_x64.dmg) |
+| **Windows** (x64) | [`.exe` installer](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.2_x64-setup.exe) |
+| **Windows** (ARM64) | [`.exe` installer](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.2_arm64-setup.exe) |
+| **Linux** | [AppImage](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/Walkmark_0.1.2_amd64.AppImage) · [`.deb`](https://github.com/e-vicius/walkmark-desktop/releases/latest/download/walkmark_0.1.2_amd64.deb) |
 
-Asset names match tag `v0.1.1`. See [all releases](https://github.com/e-vicius/walkmark-desktop/releases) if a newer version is available.
+Asset names match tag `v0.1.2`. See [all releases](https://github.com/e-vicius/walkmark-desktop/releases) if a newer version is available.
 
 Requires macOS 11+, Windows 10+, or a recent Linux desktop with screen capture.
 
